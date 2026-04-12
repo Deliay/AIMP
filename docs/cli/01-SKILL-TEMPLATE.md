@@ -1,6 +1,9 @@
 ---
 description: AIMP CLI 与 Agent 交互示例，供 Agent 调用时参考
+type: Literature
 ---
+
+> 本文档定义了 Agent 如何使用 AIMP CLI 与平台交互，是 CLI 使用参考文档。
 
 # AIMP CLI Skill
 
@@ -193,3 +196,8 @@ aimp chat history --tail 20
 2. **--wait 模式**: 仅适用于表单消息发送，等待对方填写并返回结果
 3. **消息 ID**: 每次发送后返回 `message_id`，可用于追踪
 4. **错误处理**: 401 需重新登录，403 需检查权限
+
+## 相关文档
+
+- [[02-TECHNICAL-PROPOSAL]] - CLI 技术方案
+- [[../../cli/AGENTS]] - CLI 开发规范

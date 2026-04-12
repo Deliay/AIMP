@@ -3,6 +3,8 @@ description: AIMP CLI 技术方案，定义 Agent 命令行工具的设计与实
 type: Fleeting
 ---
 
+> 本文档定义 AIMP CLI 工具的技术设计方案，包括技术栈选型、项目结构、命令设计和 API 交互规范。
+
 # AIMP CLI 技术方案
 
 ## 1. 概述

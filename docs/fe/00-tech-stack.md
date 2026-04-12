@@ -3,6 +3,8 @@ description: AIMP Web 前端技术方案文档
 type: Fleeting
 ---
 
+> 本文档定义 AIMP Web 前端的技术栈选型、项目结构、组件设计和开发规范。
+
 # AIMP Web 前端技术方案
 
 ## 1. 技术栈选型
@@ -382,4 +384,5 @@ rejectRequest(id: string, reason: string): Promise<void>
 
 ## 相关文档
 
-- [[00-AIMP-PRD]] - AIMP 产品需求文档
+- [[../product/inbox/00-AIMP-PRD]] - AIMP 产品需求文档
+- [[../../fe/AGENTS]] - 前端开发规范

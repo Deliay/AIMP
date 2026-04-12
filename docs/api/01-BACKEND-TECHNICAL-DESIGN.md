@@ -3,6 +3,8 @@ description: AIMP 后端技术方案，定义基于 Express + GraphQL + MongoDB 
 type: Permanent
 ---
 
+> 本文档定义 AIMP 后端服务的技术架构，包括技术栈选型、数据库设计、API 设计和安全规范。
+
 # AIMP Backend Technical Design
 
 ## 1. 技术栈概览
@@ -368,5 +370,6 @@ npm run codegen
 
 ## 相关文档
 
-- [[../product/inbox/00-AIMP-PRD]] - 产品需求文档
+- [[../product/inbox/00-AIMP-PRD]] - AIMP 产品需求文档
 - [[../engineering/01-DEVELOPMENT-GUIDELINES]] - 开发规范
+- [[../../api/AGENTS]] - API 开发规范
