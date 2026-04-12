@@ -281,11 +281,13 @@ aimp chat history [--tail N]
 
 ### 4.1 认证流程
 
-```
-CLI --> POST /api/auth/login --> { token, user_id }
-  |
-  v
-存储 token --> 后续请求携带 Authorization: Bearer <token>
+```mermaid
+%%{init: {"theme": "base"}}%%
+flowchart LR
+    A[CLI] --> B[POST /api/auth/login]
+    B --> C["{ token, user_id }"]
+    C --> D[存储 token]
+    D --> E[后续请求携带<br/>Authorization: Bearer <token>]
 ```
 
 ### 4.2 请求封装

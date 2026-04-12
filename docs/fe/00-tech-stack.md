@@ -51,59 +51,72 @@ type: Fleeting
 
 ## 2. 项目结构
 
-```
-src/
-├── api/                    # API 调用层
-│   ├── client.ts           # ky 实例配置
-│   ├── auth.ts             # 认证相关 API
-│   ├── chat.ts             # 消息相关 API
-│   └── auth-request.ts      # 授权申请 API
-│
-├── components/             # 公共组件
-│   ├── ui/                 # 基础 UI 组件
-│   │   ├── button.tsx
-│   │   ├── input.tsx
-│   │   ├── card.tsx
-│   │   ├── badge.tsx
-│   │   └── ...
-│   └── features/           # 业务组件
-│       ├── chat/
-│       │   ├── chat-list.tsx
-│       │   ├── chat-window.tsx
-│       │   └── message-bubble.tsx
-│       └── auth-request/
-│           ├── auth-request-list.tsx
-│           └── auth-request-card.tsx
-│
-├── hooks/                  # 自定义 Hooks
-│   ├── use-auth.ts
-│   ├── use-chat.ts
-│   └── use-auth-requests.ts
-│
-├── lib/                    # 工具函数
-│   ├── utils.ts            # 通用工具 (cn 函数等)
-│   └── constants.ts        # 常量定义
-│
-├── pages/                  # 页面组件
-│   ├── login.tsx
-│   ├── register.tsx
-│   ├── chat-list.tsx
-│   ├── chat-detail.tsx
-│   └── auth-requests.tsx
-│
-├── store/                  # Zustand Store
-│   ├── auth-store.ts
-│   ├── chat-store.ts
-│   └── auth-request-store.ts
-│
-├── types/                  # TypeScript 类型
-│   ├── api.ts              # API 请求/响应类型
-│   ├── chat.ts              # 聊天相关类型
-│   └── auth.ts              # 认证相关类型
-│
-├── App.tsx                 # 根组件
-├── main.tsx                # 入口文件
-└── routes.tsx              # 路由配置
+```mermaid
+%%{init: {"theme": "base"}}%%
+flowchart TB
+    subgraph src["src/"]
+        subgraph api["api/"]
+            client[client.ts]
+            auth[auth.ts]
+            chat[chat.ts]
+            authRequest[auth-request.ts]
+        end
+
+        subgraph components["components/"]
+            subgraph ui["ui/"]
+                button[button.tsx]
+                input[input.tsx]
+                card[card.tsx]
+                badge[badge.tsx]
+            end
+            subgraph features["features/"]
+                subgraph chat["chat/"]
+                    chatList[chat-list.tsx]
+                    chatWindow[chat-window.tsx]
+                    messageBubble[message-bubble.tsx]
+                end
+                subgraph authRequest["auth-request/"]
+                    authRequestList[auth-request-list.tsx]
+                    authRequestCard[auth-request-card.tsx]
+                end
+            end
+        end
+
+        subgraph hooks["hooks/"]
+            useAuth[use-auth.ts]
+            useChat[use-chat.ts]
+            useAuthRequests[use-auth-requests.ts]
+        end
+
+        subgraph lib["lib/"]
+            utils[utils.ts]
+            constants[constants.ts]
+        end
+
+        subgraph pages["pages/"]
+            login[login.tsx]
+            register[register.tsx]
+            chatListPage[chat-list.tsx]
+            chatDetail[chat-detail.tsx]
+            authRequestsPage[auth-requests.tsx]
+        end
+
+        subgraph store["store/"]
+            authStore[auth-store.ts]
+            chatStore[chat-store.ts]
+            authRequestStore[auth-request-store.ts]
+        end
+
+        subgraph types["types/"]
+            api[api.ts]
+            chatType[chat.ts]
+            authType[auth.ts]
+        end
+
+        app[App.tsx]
+        main[main.tsx]
+        routes[routes.tsx]
+    end
 ```
 
 ---
@@ -112,26 +125,32 @@ src/
 
 ### 3.1 组件层次
 
-```
-App
-├── AuthLayout (未登录)
-│   ├── LoginPage
-│   └── RegisterPage
-│
-└── MainLayout (已登录)
-    ├── Sidebar
-    │   ├── ChatList
-    │   └── AuthRequestBadge
-    │
-    ├── ChatPage /:topicId
-    │   ├── ChatHeader
-    │   ├── MessageList
-    │   │   └── MessageBubble (text | form)
-    │   ├── MessageInput
-    │   └── TypingIndicator
-    │
-    └── AuthRequestsPage
-        └── AuthRequestCard[]
+```mermaid
+%%{init: {"theme": "base"}}%%
+flowchart TB
+    App --> AuthLayout
+    App --> MainLayout
+
+    subgraph AuthLayout["AuthLayout (未登录)"]
+        LoginPage
+        RegisterPage
+    end
+
+    subgraph MainLayout["MainLayout (已登录)"]
+        Sidebar
+        Sidebar --> ChatList
+        Sidebar --> AuthRequestBadge
+
+        ChatPage["ChatPage /:topicId"]
+        ChatPage --> ChatHeader
+        ChatPage --> MessageList
+        MessageList --> MessageBubble["MessageBubble<br/>(text | form)"]
+        ChatPage --> MessageInput
+        ChatPage --> TypingIndicator
+
+        AuthRequestsPage
+        AuthRequestsPage --> AuthRequestCard["AuthRequestCard[]"]
+    end
 ```
 
 ### 3.2 关键组件接口

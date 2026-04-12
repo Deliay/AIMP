@@ -9,7 +9,7 @@ type: Permanent
 
 | 层级 | 技术选型 | 说明 |
 |------|---------|------|
-| API Framework | Express + Apollo Server | GraphQL API |
+| API Framework | Express + Apollo Server + REST | GraphQL + REST 混合 API |
 | Language | TypeScript | 类型安全 |
 | Database | MongoDB + Mongoose | Document 模型 |
 | Auth | nanoid (API Key) + jsonwebtoken (JWT) | 无状态认证 |
@@ -21,7 +21,9 @@ type: Permanent
 ```
 AIMP/
 ├── contract/                          # 契约层（不可直接修改）
-│   └── aimp.schema                    # GraphQL Schema 定义
+│   ├── aimp.schema                    # GraphQL Schema 定义
+│   └── aimp.auth.yaml                 # REST API (OpenAPI) 定义
+│                                        # 仅限主账号注册、登录、Session
 │
 ├── api/                               # 后端服务
 │   ├── src/
@@ -163,74 +165,69 @@ db.topics.createIndex({ "members": 1 })
 
 ## 4. API 设计
 
-### 4.1 认证流程
+### 4.1 认证流程（REST API）
 
-```
-┌─────────┐                              ┌─────────┐
-│  CLI    │                              │  Server │
-└────┬────┘                              └────┬────┘
-     │                                        │
-     │  aimp login --api-key <KEY>            │
-     │  ──────────────────────────────────────>│
-     │                                        │ 验证 API Key
-     │                                        │ 生成 JWT
-     │  { token, userId }                     │
-     │  <─────────────────────────────────────│
-     │                                        │
-     │  Token 保存到 ~/.aimp/config           │
-```
+主账号（人类用户）的注册、登录、Session 管理使用 REST API。
 
-### 4.2 子帐号创建授权流程
+```mermaid
+%%{init: {"theme": "base"}}%%
+sequenceDiagram
+    participant CLI
+    participant Server
 
-```
-Agent                        Server                     Human Console
-  │                            │                              │
-  │  createSubaccount          │                              │
-  │  name: "data-collector"    │                              │
-  │  purpose: "数据采集"       │                              │
-  │  reason: "..."             │                              │
-  │───────────────────────────>│                              │
-  │                            │                              │
-  │                            │  创建 AuthRequest (pending)   │
-  │                            │  创建 Auth Topic             │
-  │                            │──────────────────────────────>│
-  │                            │                              │
-  │                            │<───────── approve ───────────│
-  │                            │                              │
-  │  { requestId, status:     │                              │
-  │    pending }               │                              │
-  │<───────────────────────────│                              │
-  │                            │                              │
-  │  (如果 --wait)             │                              │
-  │  轮询 authRequest 状态      │                              │
-  │                            │                              │
-  │                            │<───────── reject ────────────│
-  │  { reject: true,           │                              │
-  │    reason: "..." }        │                              │
-  │<───────────────────────────│                              │
+    CLI->>Server: POST /api/auth/login<br/>{ apiKey: "ak_xxx" }
+    Server->>Server: 验证 API Key
+    Server->>Server: 生成 JWT
+    Server->>CLI: { token, userId }
+    Note over CLI: Token 保存到 ~/.aimp/config
 ```
 
-### 4.3 消息发送流程
+**REST API 端点**：
+- `POST /api/auth/register` - 主账号注册
+- `POST /api/auth/login` - 主账号登录
+- `POST /api/auth/session` - Session 刷新
+- `DELETE /api/auth/session` - 登出
+- `GET /api/auth/me` - 获取当前用户
 
+**其他所有场景使用 GraphQL API**
+
+### 4.2 子帐号创建授权流程（GraphQL）
+
+```mermaid
+%%{init: {"theme": "base"}}%%
+sequenceDiagram
+    participant Agent
+    participant Server
+    participant Console as Human Console
+
+    Agent->>Server: createSubaccount<br/>name: "data-collector"<br/>purpose: "数据采集"<br/>reason: "..."
+    Server->>Server: 创建 AuthRequest (pending)
+    Server->>Server: 创建 Auth Topic
+    Server->>Console: 显示授权申请
+    Console->>Server: approve
+    Server->>Agent: { requestId, status: pending }
+    
+    alt --wait 模式
+        Agent->>Server: 轮询 authRequest 状态
+        Console->>Server: reject<br/>reason: "..."
+        Server->>Agent: { reject: true, reason: "..." }
+    end
 ```
-Agent/Human                  Server                      
-  │                            │                         
-  │  sendMessage               │                         
-  │  topicId: "xxx"            │                         
-  │  type: "text" | "form"     │                         
-  │  content: { ... }          │                         
-  │───────────────────────────>│                         
-  │                            │                         
-  │                            │  [验证发送权限]          
-  │                            │  子帐号只能发给:          
-  │                            │    - 人类用户            
-  │                            │    - 其他子帐号          
-  │                            │                         
-  │                            │  写入 Message            
-  │                            │  更新 Topic.updatedAt    
-  │                            │                         
-  │  { message }               │                         
-  │<───────────────────────────│                         
+
+### 4.3 消息发送流程（GraphQL）
+
+```mermaid
+%%{init: {"theme": "base"}}%%
+sequenceDiagram
+    participant Client as Agent/Human
+    participant Server
+
+    Client->>Server: sendMessage<br/>topicId: "xxx"<br/>type: "text" | "form"<br/>content: { ... }
+    Server->>Server: 验证发送权限
+    Note over Server: 子帐号只能发给:<br/>- 人类用户<br/>- 其他子帐号
+    Server->>Server: 写入 Message
+    Server->>Server: 更新 Topic.updatedAt
+    Server->>Client: { message }
 ```
 
 ## 5. 核心业务规则
@@ -331,13 +328,11 @@ volumes:
 ### 8.1 代码生成
 
 ```bash
-# 1. 修改 contract/aimp.schema
-
-# 2. 生成类型和 Resolver 骨架
+# 1. 生成类型和 Resolver 骨架
 cd api
 npm run codegen
 
-# 3. 实现生成的 resolvers
+# 2. 实现生成的 resolvers
 ```
 
 ### 8.2 目录结构约定
@@ -346,6 +341,8 @@ npm run codegen
 - Resolver 实现放在 `resolvers/` 下
 - 业务逻辑放在 `services/` 下
 - 数据库模型放在 `models/` 下
+- REST API 路由放在 `routes/auth.ts` 下（仅限认证相关）
+- OpenAPI 契约定义在 `contract/aimp.auth.yaml`
 
 ### 8.3 测试要求
 

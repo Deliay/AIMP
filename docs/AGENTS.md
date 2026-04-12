@@ -59,3 +59,43 @@ type: Fleeting
 
 - 每个文件顶部应包含背景说明，解释此文档的用途
 - 必要时在文件末尾添加「相关文档」小节，列出关联文件
+
+## 图形绘制规范
+
+所有文档中的流程图、架构图、时序图等图形必须使用 Mermaid 语法绘制，禁止使用外部图片文件。
+
+### Mermaid 使用要求
+
+- 使用 ` ```mermaid ` 代码块包裹 Mermaid 语法
+- 保持图形简洁清晰，避免过于复杂的图形
+- 图形应具有描述性标题，使用 `%%{init: {"theme": "base"}}%%` 统一样式
+
+**示例**：
+
+```mermaid
+%%{init: {"theme": "base"}}%%
+flowchart TD
+    A[开始] --> B{判断}
+    B -->|条件1| C[处理1]
+    B -->|条件2| D[处理2]
+    C --> E[结束]
+    D --> E
+```
+
+### 支持的图形类型
+
+| 类型 | 用途 |
+|------|------|
+| flowchart | 流程图、决策树 |
+| sequenceDiagram | 时序图、交互图 |
+| classDiagram | 类图、架构图 |
+| stateDiagram | 状态图 |
+| entityRelationshipDiagram | ER 图 |
+| gantt | 项目进度图 |
+| pie | 饼图 |
+
+### 图形管理
+
+- 图形源代码直接写在 Markdown 文档中，便于版本管理
+- 避免使用外部图形文件（如 .png、.jpg、.svg）
+- 复杂图形应拆分为多个简化的子图形
