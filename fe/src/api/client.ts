@@ -1,7 +1,10 @@
 import ky from 'ky';
 
+const apiBase = __API_HTTP__ ? `${__API_HTTP__}/api` : '/api';
+const graphqlBase = __API_HTTP__ ? `${__API_HTTP__}/graphql` : '/graphql';
+
 export const client = ky.create({
-  prefix: '/api',
+  prefix: apiBase,
   hooks: {
     init: [
       (options) => {
@@ -17,7 +20,7 @@ export const client = ky.create({
 });
 
 export const graphqlClient = ky.create({
-  prefix: '/graphql',
+  prefix: graphqlBase,
   hooks: {
     init: [
       (options) => {
