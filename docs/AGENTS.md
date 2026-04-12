@@ -1,5 +1,23 @@
 # 文档管理规范
 
+> 本文档定义了仓库中文档的组织和编写规范。
+
+## 文档元数据
+
+所有文档顶部应包含 YAML front matter：
+
+---
+description: 文档描述，简短说明此文档的用途
+type: Fleeting | Literature | Permanent
+---
+
+**示例**（来自 [[../product/inbox/00-AIMP-PRD.md]]）：
+
+---
+description: AIMP 产品需求文档，定义面向 AI Agent 的即时通讯平台需求
+type: Fleeting
+---
+
 ## inbox 子目录
 
 所有文档文件夹 `docs/<folder>/` 会有 inbox 子目录，用于放入未整理的文档。
