@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+
+import { Command } from 'commander'
+import { makeLoginCommand } from './commands/login'
+import { makeLogoutCommand } from './commands/logout'
+import { makeSubaccountCommands } from './commands/subaccount'
+import { makeChatCommands } from './commands/chat'
+
+const program = new Command()
+
+program
+  .name('aimp')
+  .description('AIMP CLI - AI Agent 与 AIMP 平台交互的命令行工具')
+  .version('0.1.0')
+
+program
+  .option('--server <URL>', '指定 API 服务器地址')
+  .option('--json', '输出 JSON 格式')
+  .option('--verbose', '显示详细调试信息')
+
+makeLoginCommand(program)
+makeLogoutCommand(program)
+makeSubaccountCommands(program)
+makeChatCommands(program)
+
+program.parse(process.argv)
