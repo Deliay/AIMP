@@ -187,3 +187,6 @@ aspire start
 ## 输出目录配置
 
 `aspire-docker-compose` 目录预留给 Docker Compose 部署输出。运行 `aspire publish` 或 `aspire deploy` 时，输出文件将生成到指定目录。
+
+## 找不到`aspire.ts`
+在对应目录运行`aspire restore`即可。

@@ -1,12 +1,18 @@
-// Aspire TypeScript AppHost
-// For more information, see: https://aspire.dev
-
-import { createBuilder } from './.modules/aspire.js';
+import { createBuilder, ContainerLifetime } from './.modules/aspire.js';
 
 const builder = await createBuilder();
 
-// Add your resources here, for example:
-// const redis = await builder.addContainer("cache", "redis:latest");
-// const postgres = await builder.addPostgres("db");
+const mongo = await builder.addMongoDB('mongo');
+mongo.withLifetime(ContainerLifetime.Persistent);
+const mongodb = await mongo.addDatabase('mongodb');
+
+const api = await builder.addJavaScriptApp('api', '../../api');
+api.withHttpEndpoint({ port: 4000, env: 'PORT' });
+api.withReference(mongodb);
+api.waitFor(mongodb);
+
+const fe = await builder.addJavaScriptApp('fe', '../../fe');
+fe.withHttpEndpoint({ port: 5173, env: 'VITE_PORT' });
+fe.withReference(api);
 
 await builder.build().run();
