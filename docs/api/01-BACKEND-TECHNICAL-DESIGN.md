@@ -339,11 +339,11 @@ npm run codegen
 
 ### 8.2 目录结构约定
 
-- `__generated__/` 目录由 codegen 生成，**禁止手动修改**
-- Resolver 实现放在 `resolvers/` 下
-- 业务逻辑放在 `services/` 下
-- 数据库模型放在 `models/` 下
-- REST API 路由放在 `routes/auth.ts` 下（仅限认证相关）
+- `api/src/__generated__/` 目录由 codegen 生成，**禁止手动修改**
+- Resolver 实现放在 `api/src/resolvers/` 下
+- 业务逻辑放在 `api/src/services/` 下
+- 数据库模型放在 `api/src/models/` 下
+- REST API 路由放在 `api/src/routes/auth.ts` 下（仅限认证相关）
 - OpenAPI 契约定义在 `contract/aimp.auth.yaml`
 
 ### 8.3 测试要求
@@ -366,7 +366,6 @@ npm run codegen
 - [ ] WebSocket 实时消息推送
 - [ ] 群组功能 (GROUP Topic)
 - [ ] 消息搜索
-- [ ] 第三方 Skill 插件机制
 
 ## 相关文档
 
