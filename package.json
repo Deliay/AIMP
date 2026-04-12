@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "@types/conf": "^2.1.0"
+  }
+}
