@@ -92,26 +92,7 @@ E2E 测试内容必须严格依照 `docs/product/` 下的产品文档编写。
 
 ### 1.2 测试范围
 
-**人类用户操作场景**：
-- [ ] 帐号注册 (`docs/product/inbox/00-AIMP-PRD` 3.1.1)
-- [ ] 聊天列表查看
-- [ ] 聊天记录查看与 Markdown 渲染
-- [ ] 发送文本消息
-- [ ] 发送表单消息
-- [ ] 审批 Agent 子帐号申请
-
-**Agent CLI 操作场景**：
-- [ ] `aimp login` 认证登录
-- [ ] `aimp subaccount create` 创建子帐号申请
-- [ ] `aimp subaccount list` 查询申请状态
-- [ ] `aimp chat send` 发送消息
-- [ ] `aimp chat receive` 接收消息
-- [ ] `aimp chat history` 获取历史消息
-
-**端到端流程测试**：
-- [ ] Human ↔ Agent 消息收发完整流程
-- [ ] Agent 子帐号申请-审批完整流程（包含拒绝场景）
-- [ ] 表单消息提交-响应完整流程
+E2E 测试覆盖产品文档中定义的所有用户交互流程。
 
 ### 1.3 Playwright Skill 使用
 
@@ -149,42 +130,11 @@ API 测试必须严格按照 `contract/` 下的 Schema 定义编写：
 
 ### 2.2 GraphQL API 测试 (`contract/aimp.schema`)
 
-测试必须覆盖所有 Query 和 Mutation：
-
-**Query 测试**：
-- [ ] `me` - 获取当前用户
-- [ ] `subaccounts` - 获取子帐号列表
-- [ ] `authRequests(status)` - 获取授权申请列表
-- [ ] `topics` - 获取聊天列表
-- [ ] `topic(id)` - 获取单个 Topic
-- [ ] `messages(topicId, limit, before)` - 获取消息历史
-
-**Mutation 测试**：
-- [ ] `createSubaccount(name, purpose, reason)` - 创建子帐号申请
-- [ ] `approveSubaccount(requestId)` - 批准授权申请
-- [ ] `rejectSubaccount(requestId, reason)` - 拒绝授权申请
-- [ ] `sendMessage(topicId, type, content)` - 发送消息
-- [ ] `markAsRead(topicId)` - 标记已读
-
-**类型覆盖测试**：
-- [ ] `User` - 验证所有字段类型和枚举值 (HUMAN/AGENT)
-- [ ] `Subaccount` - 验证状态枚举 (PENDING/APPROVED/REJECTED)
-- [ ] `Topic` - 验证类型枚举 (DIRECT/GROUP/AUTH) 和 unreadCount
-- [ ] `Message` - 验证类型枚举 (TEXT/FORM) 和 content JSON 结构
-- [ ] `AuthRequest` - 验证完整字段
+测试必须覆盖所有 Query 和 Mutation，具体测试用例参见 `contract/` 下的 Schema 定义。
 
 ### 2.3 REST Auth API 测试 (`contract/aimp.auth.yaml`)
 
-- [ ] `POST /api/auth/register` - 主账号注册
-- [ ] `POST /api/auth/login` - 主账号登录
-- [ ] `POST /api/auth/session` - Session 刷新
-- [ ] `DELETE /api/auth/session` - 登出
-- [ ] `GET /api/auth/me` - 获取当前用户
-
-**错误场景测试**：
-- [ ] 注册邮箱已存在返回 409
-- [ ] 登录 API Key 无效返回 401
-- [ ] 未登录访问受保护接口返回 401
+REST Auth API 测试覆盖 `contract/aimp.auth.yaml` 中定义的所有端点。
 
 ### 2.4 测试执行
 
