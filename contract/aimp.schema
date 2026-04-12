@@ -1,0 +1,144 @@
+scalar DateTime
+scalar JSON
+
+enum UserType {
+  HUMAN
+  AGENT
+}
+
+enum SubaccountStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TopicType {
+  DIRECT
+  GROUP
+  AUTH
+}
+
+enum MessageType {
+  TEXT
+  FORM
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type RegisterPayload {
+  userId: ID!
+  apiKey: String!
+}
+
+type LoginPayload {
+  token: String!
+  userId: ID!
+}
+
+type User {
+  id: ID!
+  email: String
+  type: UserType!
+  description: String
+  createdAt: DateTime!
+}
+
+type Subaccount {
+  id: ID!
+  name: String!
+  purpose: String!
+  status: SubaccountStatus!
+  apiKey: String
+  createdAt: DateTime!
+}
+
+type CreateSubaccountPayload {
+  requestId: ID!
+  status: SubaccountStatus!
+}
+
+type AuthRequest {
+  id: ID!
+  applicant: User!
+  subaccountName: String!
+  subaccountPurpose: String!
+  reason: String!
+  status: SubaccountStatus!
+  rejectReason: String
+  createdAt: DateTime!
+}
+
+type ApproveAuthRequestPayload {
+  status: SubaccountStatus!
+  subaccount: Subaccount!
+}
+
+type RejectAuthRequestPayload {
+  status: SubaccountStatus!
+}
+
+type Message {
+  id: ID!
+  sender: User!
+  type: MessageType!
+  content: JSON!
+  createdAt: DateTime!
+}
+
+type Topic {
+  id: ID!
+  type: TopicType!
+  name: String
+  members: [User!]!
+  lastMessage: Message
+  unreadCount: Int!
+  createdAt: DateTime!
+}
+
+type FormField {
+  type: String!
+  name: String!
+  label: String!
+  options: [String!]
+}
+
+type FormContent {
+  title: String!
+  fields: [FormField!]!
+  submitLabel: String
+}
+
+input FormFieldInput {
+  type: String!
+  name: String!
+  label: String!
+  options: [String!]
+}
+
+input FormContentInput {
+  title: String!
+  fields: [FormFieldInput!]!
+  submitLabel: String
+}
+
+type Query {
+  me: User
+  subaccounts: [Subaccount!]!
+  authRequests(status: SubaccountStatus): [AuthRequest!]!
+  topics: [Topic!]!
+  topic(id: ID!): Topic
+  messages(topicId: ID!, limit: Int, before: DateTime): [Message!]!
+}
+
+type Mutation {
+  register(email: String!, password: String!): RegisterPayload!
+  login(apiKey: String!): LoginPayload!
+  createSubaccount(name: String!, purpose: String!, reason: String!): CreateSubaccountPayload!
+  approveSubaccount(requestId: ID!): ApproveAuthRequestPayload!
+  rejectSubaccount(requestId: ID!, reason: String!): RejectAuthRequestPayload!
+  sendMessage(topicId: ID!, type: MessageType!, content: JSON!): Message!
+  markAsRead(topicId: ID!): Boolean!
+}
