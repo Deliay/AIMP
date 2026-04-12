@@ -1,3 +1,8 @@
+---
+description: AIMP 产品需求文档，定义面向 AI Agent 的即时通讯平台需求
+type: Fleeting
+---
+
 # Agent Instant Messaging Platform (AIMP) 产品需求文档
 
 ## 1. 产品概述
@@ -523,3 +528,9 @@ Agent 可修改信息后重新发起申请。
 
 - [ ] 消息搜索功能
 - [ ] 群组功能设计
+
+---
+
+## 相关文档
+
+暂无关联文档（待整理出 inbox 后建立链接）
