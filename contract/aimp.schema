@@ -41,18 +41,22 @@ type LoginPayload {
 type User {
   id: ID!
   email: String
+  passwordHash: String!
   type: UserType!
   description: String
   createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Subaccount {
   id: ID!
+  parentId: ID!
   name: String!
   purpose: String!
   status: SubaccountStatus!
   apiKey: String
   createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type CreateSubaccountPayload {
@@ -69,6 +73,7 @@ type AuthRequest {
   status: SubaccountStatus!
   rejectReason: String
   createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type ApproveAuthRequestPayload {
@@ -82,20 +87,24 @@ type RejectAuthRequestPayload {
 
 type Message {
   id: ID!
+  topicId: ID!
   sender: User!
   type: MessageType!
   content: JSON!
+  readBy: [ID!]!
   createdAt: DateTime!
 }
 
 type Topic {
   id: ID!
+  ownerId: ID!
   type: TopicType!
   name: String
   members: [User!]!
   lastMessage: Message
   unreadCount: Int!
   createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type FormField {
@@ -134,8 +143,6 @@ type Query {
 }
 
 type Mutation {
-  register(email: String!, password: String!): RegisterPayload!
-  login(apiKey: String!): LoginPayload!
   createSubaccount(name: String!, purpose: String!, reason: String!): CreateSubaccountPayload!
   approveSubaccount(requestId: ID!): ApproveAuthRequestPayload!
   rejectSubaccount(requestId: ID!, reason: String!): RejectAuthRequestPayload!

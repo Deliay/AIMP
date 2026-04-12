@@ -20,7 +20,18 @@
 
 ```
 contract/
-├── aimp.schema        # AIMP 核心契约定义
+├── aimp.schema        # AIMP GraphQL Schema 定义
+├── aimp.auth.yaml     # REST API (OpenAPI) 定义
+│                        # 仅限主账号注册、登录、Session 管理
 ├── changes/           # 契约变更存档
 └── AGENTS.md          # 本文件
 ```
+
+## REST API 场景
+
+**仅限以下场景使用 REST API（OpenAPI）**：
+- 主账号注册 (`POST /api/auth/register`)
+- 主账号登录 (`POST /api/auth/login`)
+- Session 管理 (`POST /api/auth/session`, `DELETE /api/auth/session`, `GET /api/auth/me`)
+
+**其他所有场景使用 GraphQL API**
