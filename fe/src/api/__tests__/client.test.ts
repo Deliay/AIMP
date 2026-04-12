@@ -7,7 +7,7 @@ vi.mock('ky', () => {
     delete: vi.fn().mockReturnThis(),
     json: vi.fn(),
   }))
-  mockKy.create = vi.fn(() => ({
+  ;(mockKy as unknown as Record<string, unknown>).create = vi.fn(() => ({
     post: vi.fn().mockReturnThis(),
     get: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),

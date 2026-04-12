@@ -1,6 +1,8 @@
 import { vi } from 'vitest'
 
-global.sessionStorage = {
+globalThis.__API_HTTP__ = ''
+
+globalThis.sessionStorage = {
   getItem: vi.fn(),
   setItem: vi.fn(),
   removeItem: vi.fn(),
@@ -9,4 +11,4 @@ global.sessionStorage = {
   length: 0,
 } as unknown as Storage
 
-Object.defineProperty(window, 'sessionStorage', { value: global.sessionStorage })
+Object.defineProperty(globalThis, 'sessionStorage', { value: globalThis.sessionStorage })

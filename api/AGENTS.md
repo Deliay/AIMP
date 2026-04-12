@@ -58,3 +58,40 @@ API 开发必须遵循 **契约优先（Contract-First）** 原则：
 
 - [[../docs/AGENTS.md]] - 通用文档规范
 - [[../contract/AGENTS.md]] - 契约规范定义
+
+---
+
+## 测试规范
+
+### 单元测试要求
+
+所有新增代码必须包含单元测试，覆盖率要求：
+
+| 模块 | 最低覆盖率 |
+|------|-----------|
+| src/services/ | 80% |
+| src/models/ | 80% |
+| src/middleware/ | 80% |
+| src/resolvers/ | 80% |
+
+测试文件放置在对应模块的 `__tests__/` 目录或 `*.test.ts` 文件中。
+
+### 开发流程
+
+完成代码编写后，必须执行以下步骤：
+
+```bash
+# 1. 运行单元测试
+npm run test
+
+# 2. 运行类型检查
+npm run typecheck
+
+# 3. 运行构建
+npm run build
+
+# 4. 运行 lint
+npm run lint
+```
+
+所有步骤必须通过才能提交代码。

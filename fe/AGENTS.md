@@ -71,3 +71,41 @@ src/
 
 - [[00-tech-stack]] - 前端技术方案详述
 - [[../engineering/01-DEVELOPMENT-GUIDELINES]] - 工程开发规范
+
+---
+
+## 测试规范
+
+### 单元测试要求
+
+所有新增代码必须包含单元测试，覆盖率要求：
+
+| 模块 | 最低覆盖率 |
+|------|-----------|
+| api/ | 80% |
+| store/ | 80% |
+| lib/ | 80% |
+| hooks/ | 70% |
+| components/ | 50% |
+
+测试文件放置在对应模块的 `__tests__/` 目录或 `*.test.{ts,tsx}` 文件中。
+
+### 开发流程
+
+完成代码编写后，必须执行以下步骤：
+
+```bash
+# 1. 运行单元测试
+npm run test
+
+# 2. 运行类型检查
+npm run typecheck
+
+# 3. 运行构建
+npm run build
+
+# 4. 运行 lint
+npm run lint
+```
+
+所有步骤必须通过才能提交代码。
