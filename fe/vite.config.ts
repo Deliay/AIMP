@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { vitest } from 'vitest/config'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -15,5 +16,11 @@ export default defineConfig({
           '/graphql': { target: process.env.API_HTTP, changeOrigin: true },
         }
       : undefined,
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    include: ['src/**/__tests__/**/*.{ts,tsx}', 'src/**/*.{test,spec}.{ts,tsx}'],
+    setupFiles: ['./src/vitest-setup.ts'],
   },
 })
