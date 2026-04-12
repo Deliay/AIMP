@@ -41,7 +41,6 @@ type LoginPayload {
 type User {
   id: ID!
   email: String
-  passwordHash: String!
   type: UserType!
   description: String
   createdAt: DateTime!
