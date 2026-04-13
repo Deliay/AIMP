@@ -7,7 +7,8 @@ export interface RegisterRequest {
 }
 
 export interface LoginRequest {
-  apiKey: string;
+  email: string;
+  password: string;
 }
 
 export interface ErrorResponse {

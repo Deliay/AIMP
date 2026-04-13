@@ -29,7 +29,7 @@ describe('store/auth-store', () => {
   })
 
   describe('login', () => {
-    it('should login successfully with api key', async () => {
+    it('should login successfully with email and password', async () => {
       const { useAuthStore } = await import('../auth-store')
       const { authApi } = await import('../../api/auth')
       const mockUser = { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, createdAt: '', updatedAt: '' }
@@ -39,7 +39,7 @@ describe('store/auth-store', () => {
       vi.mocked(authApi.getCurrentUser).mockResolvedValue(mockUser)
 
       await act(async () => {
-        await useAuthStore.getState().login('ak_test')
+        await useAuthStore.getState().login('test@example.com', 'password123')
       })
 
       const state = useAuthStore.getState()
@@ -53,14 +53,14 @@ describe('store/auth-store', () => {
       const { useAuthStore } = await import('../auth-store')
       const { authApi } = await import('../../api/auth')
 
-      vi.mocked(authApi.login).mockRejectedValue(new Error('Invalid API key'))
+      vi.mocked(authApi.login).mockRejectedValue(new Error('Invalid credentials'))
 
       await act(async () => {
-        await expect(useAuthStore.getState().login('invalid')).rejects.toThrow('Invalid API key')
+        await expect(useAuthStore.getState().login('test@example.com', 'wrongpassword')).rejects.toThrow('Invalid credentials')
       })
 
       const state = useAuthStore.getState()
-      expect(state.error).toBe('Invalid API key')
+      expect(state.error).toBe('Invalid credentials')
       expect(state.isLoading).toBe(false)
     })
   })

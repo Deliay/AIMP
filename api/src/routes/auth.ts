@@ -34,6 +34,21 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/cli-login', async (req: Request, res: Response) => {
+  try {
+    const { apiKey } = req.body;
+    if (!apiKey) {
+      return res.status(400).json({ error: 'API key is required' });
+    }
+
+    const result = await authService.loginWithApiKey(apiKey);
+    res.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'CLI login failed';
+    res.status(401).json({ error: message });
+  }
+});
+
 router.post('/session', async (req: Request, res: Response) => {
   try {
     const authHeader = req.headers.authorization;

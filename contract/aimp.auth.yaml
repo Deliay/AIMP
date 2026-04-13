@@ -6,11 +6,11 @@ info:
 
     **使用场景**：
     - 用户注册（Web Console / CLI 初始化）
-    - 用户登录（获取 JWT Token）
+    - 用户登录（获取 JWT Token）- 分为人类登录和 CLI 登录
     - Session 管理（Token 刷新）
 
     **其他所有场景使用 GraphQL API**
-  version: 1.0.0
+  version: 1.1.0
   contact:
     name: AIMP
 servers:
@@ -63,9 +63,57 @@ paths:
   /login:
     post:
       operationId: login
-      summary: 主账号登录
+      summary: 人类用户登录
       description: |
-        使用 apiKey 登录，获取 JWT Token。
+        使用邮箱和密码登录，获取 JWT Token。
+
+        **Web Console 登录方式**：
+        ```bash
+        POST /api/auth/login
+        { "email": "user@example.com", "password": "xxx" }
+        ```
+
+        Token 有效期 7 天，过期后需重新登录或使用 session/refresh 刷新。
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HumanLoginRequest'
+            example:
+              email: user@example.com
+              password: securepassword123
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                userId: "64a1b2c3d4e5f6789012abcd"
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 邮箱或密码错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /cli-login:
+    post:
+      operationId: cliLogin
+      summary: CLI 登录
+      description: |
+        使用 API Key 登录，获取 JWT Token。
 
         **CLI 登录方式**：
         ```bash
@@ -80,18 +128,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: '#/components/schemas/CliLoginRequest'
             example:
               apiKey: "ak_xK9mP2vL8nQ3wJ5sR7tU1yZ4"
       responses:
         '200':
           description: 登录成功
-          headers:
-            Set-Cookie:
-              schema:
-                type: string
-                description: HttpOnly Session Cookie
-              example: session=eyJhbGciOiJIUzI1NiIs...; HttpOnly; Path=/; Max-Age=604800
           content:
             application/json:
               schema:
@@ -99,6 +141,12 @@ paths:
               example:
                 token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                 userId: "64a1b2c3d4e5f6789012abcd"
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: API Key 无效
           content:
@@ -239,6 +287,33 @@ components:
 
             格式：`ak_` 前缀 + 25 位 nanoid。
             示例：`ak_xK9mP2vL8nQ3wJ5sR7tU1yZ4`
+          example: "ak_xK9mP2vL8nQ3wJ5sR7tU1yZ4"
+
+    HumanLoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: 邮箱地址
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          description: 密码
+          example: securepassword123
+
+    CliLoginRequest:
+      type: object
+      required:
+        - apiKey
+      properties:
+        apiKey:
+          type: string
+          description: 注册时获取的 API Key
           example: "ak_xK9mP2vL8nQ3wJ5sR7tU1yZ4"
 
     LoginRequest:

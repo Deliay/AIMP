@@ -55,6 +55,17 @@ export class AuthService {
     return { token, userId: user._id.toString() };
   }
 
+  async loginWithApiKey(apiKey: string): Promise<{ token: string; userId: string }> {
+    const user = await UserModel.findOne({ apiKey });
+    if (!user) {
+      throw new Error('Invalid API key');
+    }
+
+    const token = generateJwt({ userId: user._id.toString(), type: user.type });
+
+    return { token, userId: user._id.toString() };
+  }
+
   async getUserById(userId: string): Promise<UserDocument | null> {
     if (!isValidObjectId(userId)) {
       return null;

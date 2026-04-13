@@ -7,8 +7,8 @@ export const auth = {
     const client = getApiClient(serverUrl)
 
     try {
-      const response = await client.post<LoginResponse>('/api/auth/login', {
-        api_key: apiKey
+      const response = await client.post<LoginResponse>('/api/auth/cli-login', {
+        apiKey: apiKey
       })
 
       config.set('token', response.token)

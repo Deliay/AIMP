@@ -9,7 +9,8 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
 const loginSchema = z.object({
-  apiKey: z.string().min(1, 'API Key is required'),
+  email: z.string().email('Valid email is required'),
+  password: z.string().min(1, 'Password is required'),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -27,7 +28,7 @@ export function LoginPage() {
 
   const onSubmit = async (data: LoginForm) => {
     try {
-      await login(data.apiKey);
+      await login(data.email, data.password);
       navigate('/chats');
     } catch {
       // Error handled in store
@@ -39,19 +40,32 @@ export function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Login to AIMP</CardTitle>
-          <CardDescription>Enter your API Key to access your account</CardDescription>
+          <CardDescription>Enter your email and password to access your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="apiKey">API Key</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="apiKey"
-                placeholder="ak_xK9mP2vL8nQ3wJ5sR7tU1yZ4"
-                {...register('apiKey')}
+                id="email"
+                type="email"
+                placeholder="user@example.com"
+                {...register('email')}
               />
-              {errors.apiKey && (
-                <p className="text-sm text-red-500">{errors.apiKey.message}</p>
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                {...register('password')}
+              />
+              {errors.password && (
+                <p className="text-sm text-red-500">{errors.password.message}</p>
               )}
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}

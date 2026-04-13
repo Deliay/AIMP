@@ -107,6 +107,43 @@ describe('REST Routes - Auth', () => {
     });
   });
 
+  describe('POST /api/auth/cli-login', () => {
+    beforeEach(async () => {
+      await request(app)
+        .post('/api/auth/register')
+        .send({ email: 'cli@example.com', password: 'password123' });
+    });
+
+    it('should login successfully with API key', async () => {
+      const user = await (await import('../models')).UserModel.findOne({ email: 'cli@example.com' });
+      const res = await request(app)
+        .post('/api/auth/cli-login')
+        .send({ apiKey: user!.apiKey });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('token');
+      expect(res.body).toHaveProperty('userId');
+    });
+
+    it('should return 401 with invalid API key', async () => {
+      const res = await request(app)
+        .post('/api/auth/cli-login')
+        .send({ apiKey: 'invalid-api-key' });
+
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBe('Invalid API key');
+    });
+
+    it('should return 400 when apiKey is missing', async () => {
+      const res = await request(app)
+        .post('/api/auth/cli-login')
+        .send({});
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('API key is required');
+    });
+  });
+
   describe('POST /api/auth/session', () => {
     let token: string;
 

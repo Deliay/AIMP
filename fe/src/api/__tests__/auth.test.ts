@@ -38,7 +38,7 @@ describe('api/auth', () => {
   describe('authApi.login', () => {
     it('should call client.post with correct path and data', async () => {
       const { authApi } = await import('../auth')
-      const loginData = { apiKey: 'ak_test' }
+      const loginData = { email: 'test@example.com', password: 'password123' }
       const expectedResponse = { token: 'token123', userId: '123' }
       mockJson.mockResolvedValue(expectedResponse)
 
