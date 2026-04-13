@@ -8,6 +8,7 @@
 test/
 ├── e2e/                      # 端到端测试
 │   ├── skills/              # Playwright Skill 相关资源
+│   ├── tools/               # 临时调试工具（截图、日志检查等）
 │   └── *.test.ts            # E2E 测试用例
 │
 ├── api/                     # API 契约测试
@@ -114,6 +115,18 @@ npx playwright test --generate
 - 使用 `storageState` 管理登录状态
 - 视频录制配置见 [[../test/.agents/skills/playwright-cli/references/video-recording]]
 - Trace 追踪配置见 [[../test/.agents/skills/playwright-cli/references/tracing]]
+
+### 1.4 临时调试工具 (`test/e2e/tools/`)
+
+临时 E2E 调试工具（如截图、日志检查、网络请求分析等）放置在此目录：
+
+| 工具 | 用途 |
+|------|------|
+| `take-screenshot.ts` | 页面截图 |
+| `check-console.ts` | 检查浏览器控制台错误 |
+| `check-network.ts` | 检查网络请求失败 |
+
+这些工具仅用于开发调试，不作为正式测试用例。正式 E2E 测试应编写为 `*.test.ts` 文件。
 
 ---
 
