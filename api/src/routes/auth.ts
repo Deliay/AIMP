@@ -92,4 +92,26 @@ router.get('/me', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/api-key', async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
+    const token = authHeader.slice(7);
+    const payload = verifyJwt(token);
+    const user = await authService.getUserById(payload.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ apiKey: user.apiKey });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to get API key';
+    res.status(401).json({ error: message });
+  }
+});
+
 export default router;

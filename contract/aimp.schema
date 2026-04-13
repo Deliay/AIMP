@@ -43,6 +43,7 @@ type User {
   email: String
   type: UserType!
   description: String
+  apiKey: String
   createdAt: DateTime!
   updatedAt: DateTime!
 }

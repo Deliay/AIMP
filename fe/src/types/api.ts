@@ -11,6 +11,7 @@ export interface User {
   email: string | null;
   type: UserType;
   description: string | null;
+  apiKey: string | null;
   createdAt: string;
   updatedAt: string;
 }

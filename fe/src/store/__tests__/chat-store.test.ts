@@ -65,7 +65,7 @@ describe('store/chat-store', () => {
       const { useChatStore } = await import('../chat-store')
       const { chatApi } = await import('../../api/chat')
       const mockMessages = [
-        { id: 'm1', topicId: '1', sender: { id: 'u1', email: null, type: 'HUMAN' as const, description: null, createdAt: '', updatedAt: '' }, type: 'TEXT' as const, content: { content: 'Hello' }, readBy: [], createdAt: '' },
+        { id: 'm1', topicId: '1', sender: { id: 'u1', email: null, type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' }, type: 'TEXT' as const, content: { content: 'Hello' }, readBy: [], createdAt: '' },
       ]
 
       vi.mocked(chatApi.getMessages).mockResolvedValue(mockMessages)
@@ -82,8 +82,8 @@ describe('store/chat-store', () => {
     it('should append messages to existing topic messages', async () => {
       const { useChatStore } = await import('../chat-store')
       const { chatApi } = await import('../../api/chat')
-      const existingMessage = { id: 'm1', topicId: '1', sender: { id: 'u1', email: null, type: 'HUMAN' as const, description: null, createdAt: '', updatedAt: '' }, type: 'TEXT' as const, content: { content: 'Hello' }, readBy: [], createdAt: '' }
-      const newMessages = [{ id: 'm2', topicId: '1', sender: { id: 'u2', email: null, type: 'HUMAN' as const, description: null, createdAt: '', updatedAt: '' }, type: 'TEXT' as const, content: { content: 'Hi' }, readBy: [], createdAt: '' }]
+      const existingMessage = { id: 'm1', topicId: '1', sender: { id: 'u1', email: null, type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' }, type: 'TEXT' as const, content: { content: 'Hello' }, readBy: [], createdAt: '' }
+      const newMessages = [{ id: 'm2', topicId: '1', sender: { id: 'u2', email: null, type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' }, type: 'TEXT' as const, content: { content: 'Hi' }, readBy: [], createdAt: '' }]
 
       useChatStore.setState({ messages: { '1': [existingMessage] } })
       vi.mocked(chatApi.getMessages).mockResolvedValue(newMessages)
@@ -101,7 +101,7 @@ describe('store/chat-store', () => {
     it('should send message and add to state', async () => {
       const { useChatStore } = await import('../chat-store')
       const { chatApi } = await import('../../api/chat')
-      const mockMessage = { id: 'm2', topicId: '1', sender: { id: 'u1', email: null, type: 'HUMAN' as const, description: null, createdAt: '', updatedAt: '' }, type: 'TEXT' as const, content: { content: 'Hello' }, readBy: [], createdAt: '' }
+      const mockMessage = { id: 'm2', topicId: '1', sender: { id: 'u1', email: null, type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' }, type: 'TEXT' as const, content: { content: 'Hello' }, readBy: [], createdAt: '' }
 
       vi.mocked(chatApi.sendMessage).mockResolvedValue(mockMessage)
 

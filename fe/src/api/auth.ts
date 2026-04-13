@@ -1,5 +1,5 @@
-import { client } from './client';
-import type { LoginPayload, RegisterPayload, User } from '../types/api';
+import { client, graphqlClient } from './client';
+import type { LoginPayload, RegisterPayload, User, GraphQLResponse } from '../types/api';
 
 export interface RegisterRequest {
   email: string;
@@ -39,5 +39,21 @@ export const authApi = {
   getCurrentUser: async (): Promise<User> => {
     const response = await client.get('auth/me');
     return response.json();
+  },
+
+  getCurrentUserFull: async (): Promise<User> => {
+    const response = await graphqlClient.post('', {
+      json: {
+        query: `query { me { id email type description apiKey createdAt updatedAt } }`,
+      },
+    });
+    const data: GraphQLResponse<{ me: User }> = await response.json();
+    if (data.errors?.length) {
+      throw new Error(data.errors[0].message);
+    }
+    if (!data.data?.me) {
+      throw new Error('Not authenticated');
+    }
+    return data.data.me;
   },
 };

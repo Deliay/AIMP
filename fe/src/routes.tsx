@@ -5,6 +5,7 @@ import { RegisterPage } from './pages/register';
 import { ChatListPage } from './pages/chat-list';
 import { ChatDetailPage } from './pages/chat-detail';
 import { AuthRequestsPage } from './pages/auth-requests';
+import { SettingsPage } from './pages/settings';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -60,6 +61,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <AuthRequestsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/settings',
+    element: (
+      <ProtectedRoute>
+        <SettingsPage />
       </ProtectedRoute>
     ),
   },

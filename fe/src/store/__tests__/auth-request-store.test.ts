@@ -30,7 +30,7 @@ describe('store/auth-request-store', () => {
       const mockRequests = [
         {
           id: '1',
-          applicant: { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, createdAt: '', updatedAt: '' },
+          applicant: { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' },
           subaccountName: 'Test',
           subaccountPurpose: 'Testing',
           reason: 'Need access',
@@ -88,7 +88,7 @@ describe('store/auth-request-store', () => {
       const mockRequests = [
         {
           id: '1',
-          applicant: { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, createdAt: '', updatedAt: '' },
+          applicant: { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' },
           subaccountName: 'Test',
           subaccountPurpose: 'Testing',
           reason: 'Need access',
@@ -118,7 +118,7 @@ describe('store/auth-request-store', () => {
       const mockRequests = [
         {
           id: '1',
-          applicant: { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, createdAt: '', updatedAt: '' },
+          applicant: { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' },
           subaccountName: 'Test',
           subaccountPurpose: 'Testing',
           reason: 'Need access',

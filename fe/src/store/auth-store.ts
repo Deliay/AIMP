@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const response = await authApi.login({ email, password });
       sessionStorage.setItem('token', response.token);
-      const user = await authApi.getCurrentUser();
+      const user = await authApi.getCurrentUserFull();
       set({ user, token: response.token, isAuthenticated: true, isLoading: false });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Login failed', isLoading: false });
@@ -60,7 +60,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
     set({ isLoading: true });
     try {
-      const user = await authApi.getCurrentUser();
+      const user = await authApi.getCurrentUserFull();
       set({ user, isAuthenticated: true, isLoading: false });
     } catch {
       sessionStorage.removeItem('token');

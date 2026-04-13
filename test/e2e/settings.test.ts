@@ -1,0 +1,44 @@
+import { test, expect } from './fixtures';
+
+test.describe('设置页面', () => {
+  test('点击设置按钮跳转至设置页面', async ({ page, authenticated }) => {
+    await page.goto('/chats');
+    await page.waitForLoadState('networkidle');
+
+    await page.getByRole('button', { name: 'Settings' }).click();
+
+    await expect(page).toHaveURL('/settings');
+    await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
+  });
+
+  test('设置页面显示API Key', async ({ page, authenticated }) => {
+    await page.goto('/settings');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByText('API Key')).toBeVisible();
+    await expect(page.getByText(/ak_/)).toBeVisible();
+  });
+
+  test('设置页面显示账户类型', async ({ page, authenticated }) => {
+    await page.goto('/settings');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByText('Account Type')).toBeVisible();
+    await expect(page.getByText('Human User')).toBeVisible();
+  });
+
+  test('设置页面显示邮箱', async ({ page, authenticated }) => {
+    await page.goto('/settings');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByText('Email')).toBeVisible();
+    await expect(page.getByText(/@aimp\.test/)).toBeVisible();
+  });
+
+  test('复制API Key按钮存在', async ({ page, authenticated }) => {
+    await page.goto('/settings');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByRole('button', { name: 'Copy' })).toBeVisible();
+  });
+});

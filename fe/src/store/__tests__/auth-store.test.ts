@@ -7,6 +7,7 @@ vi.mock('../../api/auth', () => ({
     register: vi.fn(),
     logout: vi.fn(),
     getCurrentUser: vi.fn(),
+    getCurrentUserFull: vi.fn(),
   },
 }))
 
@@ -32,11 +33,11 @@ describe('store/auth-store', () => {
     it('should login successfully with email and password', async () => {
       const { useAuthStore } = await import('../auth-store')
       const { authApi } = await import('../../api/auth')
-      const mockUser = { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, createdAt: '', updatedAt: '' }
+      const mockUser = { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' }
       const mockResponse = { token: 'token123', userId: 'u1' }
 
       vi.mocked(authApi.login).mockResolvedValue(mockResponse)
-      vi.mocked(authApi.getCurrentUser).mockResolvedValue(mockUser)
+      vi.mocked(authApi.getCurrentUserFull).mockResolvedValue(mockUser)
 
       await act(async () => {
         await useAuthStore.getState().login('test@example.com', 'password123')
@@ -103,7 +104,7 @@ describe('store/auth-store', () => {
 
       vi.mocked(authApi.logout).mockResolvedValue(undefined)
 
-      useAuthStore.setState({ user: { id: 'u1', email: 'test', type: 'HUMAN' as const, description: null, createdAt: '', updatedAt: '' }, token: 'token', isAuthenticated: true })
+      useAuthStore.setState({ user: { id: 'u1', email: 'test', type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' }, token: 'token', isAuthenticated: true })
 
       act(() => {
         useAuthStore.getState().logout()
