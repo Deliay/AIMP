@@ -5,6 +5,15 @@ test.describe('审批 Agent 子帐号申请', () => {
     authenticated: true,
   });
 
+  test('进入审批页面左侧边栏正常显示', async ({ page }) => {
+    await page.goto('/auth-requests');
+
+    await expect(page.getByText('Menu')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Chats' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Auth Requests' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Settings' })).toBeVisible();
+  });
+
   test('进入审批页面查看申请详情', async ({ page }) => {
     await page.goto('/auth-requests');
 

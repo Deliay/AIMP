@@ -1,6 +1,16 @@
 import { test, expect } from './fixtures';
 
 test.describe('设置页面', () => {
+  test('进入设置页面左侧边栏正常显示', async ({ page, authenticated }) => {
+    await page.goto('/settings');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByText('Menu')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Chats' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Auth Requests' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Settings' })).toBeVisible();
+  });
+
   test('点击设置按钮跳转至设置页面', async ({ page, authenticated }) => {
     await page.goto('/chats');
     await page.waitForLoadState('networkidle');
