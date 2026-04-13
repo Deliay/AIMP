@@ -27,6 +27,91 @@ describe('Resolvers', () => {
         ).rejects.toThrow('Not authenticated');
       });
     });
+
+    describe('User Field Resolvers', () => {
+      it('should resolve User.id field', async () => {
+        const { userId } = await authService.register({
+          email: 'fieldtest@example.com',
+          password: 'password123',
+        });
+
+        const context = { user: { userId, type: 'human' } };
+        const user = await (resolvers.Query as any).me(null, null, context);
+
+        const id = await (resolvers.User as any).id(user);
+        expect(id).toBe(userId);
+      });
+
+      it('should resolve User.email field', async () => {
+        const { userId } = await authService.register({
+          email: 'emailtest@example.com',
+          password: 'password123',
+        });
+
+        const context = { user: { userId, type: 'human' } };
+        const user = await (resolvers.Query as any).me(null, null, context);
+
+        const email = await (resolvers.User as any).email(user);
+        expect(email).toBe('emailtest@example.com');
+      });
+
+      it('should resolve User.type field', async () => {
+        const { userId } = await authService.register({
+          email: 'typetest@example.com',
+          password: 'password123',
+        });
+
+        const context = { user: { userId, type: 'human' } };
+        const user = await (resolvers.Query as any).me(null, null, context);
+
+        const type = await (resolvers.User as any).type(user);
+        expect(type).toBe('HUMAN');
+      });
+
+      it('should resolve User.description field', async () => {
+        const { userId } = await authService.register({
+          email: 'desctest@example.com',
+          password: 'password123',
+        });
+
+        const context = { user: { userId, type: 'human' } };
+        const user = await (resolvers.Query as any).me(null, null, context);
+
+        const description = await (resolvers.User as any).description(user);
+        expect(description).toBeUndefined();
+      });
+
+      it('should resolve User.apiKey field', async () => {
+        const { userId } = await authService.register({
+          email: 'apikeytest@example.com',
+          password: 'password123',
+        });
+
+        const context = { user: { userId, type: 'human' } };
+        const user = await (resolvers.Query as any).me(null, null, context);
+
+        const apiKey = await (resolvers.User as any).apiKey(user);
+        expect(apiKey).toBeTruthy();
+      });
+
+      it('should resolve User.createdAt and updatedAt fields', async () => {
+        const { userId } = await authService.register({
+          email: 'timestamptest@example.com',
+          password: 'password123',
+        });
+
+        const context = { user: { userId, type: 'human' } };
+        const user = await (resolvers.Query as any).me(null, null, context);
+
+        const createdAt = await (resolvers.User as any).createdAt(user);
+        const updatedAt = await (resolvers.User as any).updatedAt(user);
+
+        expect(createdAt).toBeTruthy();
+        expect(updatedAt).toBeTruthy();
+        expect(new Date(createdAt)).toBeInstanceOf(Date);
+        expect(new Date(updatedAt)).toBeInstanceOf(Date);
+      });
+    });
   });
 
   describe('Subaccount Resolvers', () => {
@@ -218,6 +303,129 @@ describe('Resolvers', () => {
         await expect(
           (resolvers.Query as any).topic(null, { id: topic._id.toString() }, context)
         ).rejects.toThrow('Not authorized to access this topic');
+      });
+    });
+
+    describe('Topic Field Resolvers', () => {
+      it('should resolve Topic.members field', async () => {
+        const otherResult = await authService.register({
+          email: 'member@example.com',
+          password: 'password123',
+        });
+
+        const topic = await topicService.createTopic({
+          type: 'group',
+          name: 'Group Topic',
+          ownerId: userId,
+          members: [userId, otherResult.userId],
+        });
+
+        const result = await (resolvers.Query as any).topic(
+          null,
+          { id: topic._id.toString() },
+          context
+        );
+
+        const members = await (resolvers.Topic as any).members(result, null, context);
+        expect(members).toHaveLength(2);
+      });
+
+      it('should resolve Topic.lastMessage field when messages exist', async () => {
+        const topic = await topicService.createTopic({
+          type: 'direct',
+          name: 'Chat Topic',
+          ownerId: userId,
+        });
+
+        await messageService.sendMessage({
+          topicId: topic._id.toString(),
+          senderId: userId,
+          type: 'text',
+          content: { text: 'Hello!' },
+        });
+
+        const result = await (resolvers.Query as any).topic(
+          null,
+          { id: topic._id.toString() },
+          context
+        );
+
+        const lastMessage = await (resolvers.Topic as any).lastMessage(result, null, context);
+        expect(lastMessage).toBeTruthy();
+        expect(lastMessage.content).toEqual({ text: 'Hello!' });
+      });
+
+      it('should resolve Topic.lastMessage to null when no messages', async () => {
+        const topic = await topicService.createTopic({
+          type: 'direct',
+          name: 'Empty Topic',
+          ownerId: userId,
+        });
+
+        const result = await (resolvers.Query as any).topic(
+          null,
+          { id: topic._id.toString() },
+          context
+        );
+
+        const lastMessage = await (resolvers.Topic as any).lastMessage(result, null, context);
+        expect(lastMessage).toBeNull();
+      });
+
+      it('should resolve Topic.unreadCount field', async () => {
+        const recipient = await authService.register({
+          email: 'recipient@example.com',
+          password: 'password123',
+        });
+
+        const topic = await topicService.createTopic({
+          type: 'direct',
+          name: 'Unread Topic',
+          ownerId: userId,
+          members: [userId, recipient.userId],
+        });
+
+        await messageService.sendMessage({
+          topicId: topic._id.toString(),
+          senderId: userId,
+          type: 'text',
+          content: { text: 'Unread message' },
+        });
+
+        const recipientContext = { user: { userId: recipient.userId, type: 'human' } };
+        const result = await (resolvers.Query as any).topic(
+          null,
+          { id: topic._id.toString() },
+          recipientContext
+        );
+
+        const unreadCount = await (resolvers.Topic as any).unreadCount(result, null, recipientContext);
+        expect(unreadCount).toBe(1);
+      });
+
+      it('should return 0 unreadCount when all messages are read', async () => {
+        const topic = await topicService.createTopic({
+          type: 'direct',
+          name: 'Read Topic',
+          ownerId: userId,
+        });
+
+        await messageService.sendMessage({
+          topicId: topic._id.toString(),
+          senderId: userId,
+          type: 'text',
+          content: { text: 'Read message' },
+        });
+
+        const result = await (resolvers.Query as any).topic(
+          null,
+          { id: topic._id.toString() },
+          context
+        );
+
+        await messageService.markAsRead(topic._id.toString(), userId);
+        const unreadCount = await (resolvers.Topic as any).unreadCount(result, null, context);
+        expect(unreadCount).toBe(0);
       });
     });
   });
