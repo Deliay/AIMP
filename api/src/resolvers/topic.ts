@@ -1,4 +1,6 @@
-import { topicService } from '../services';
+import mongoose from 'mongoose';
+import { topicService, messageService } from '../services';
+import { UserModel } from '../models';
 
 export const topicResolvers = {
   Query: {
@@ -31,55 +33,34 @@ export const topicResolvers = {
     },
   },
 
-  Mutation: {
-    createTopic: async (
-      _: unknown,
-      { type, name, members }: { type: 'direct' | 'group' | 'auth'; name: string; members?: string[] },
-      context: { user?: { userId: string; type: string } }
-    ) => {
-      if (!context.user) {
-        throw new Error('Not authenticated');
-      }
-      return topicService.createTopic({
-        type,
-        name,
-        ownerId: context.user.userId,
-        members,
-      });
+  Topic: {
+    members: async (topic: { members: mongoose.Types.ObjectId[] }) => {
+      const memberIds = topic.members.map((m) => m.toString());
+      return UserModel.find({ _id: { $in: memberIds } });
     },
-
-    addMemberToTopic: async (
-      _: unknown,
-      { topicId, userId }: { topicId: string; userId: string },
-      context: { user?: { userId: string; type: string } }
-    ) => {
-      if (!context.user) {
-        throw new Error('Not authenticated');
+    lastMessage: async (topic: { messages: Array<{ _id?: mongoose.Types.ObjectId; senderId: mongoose.Types.ObjectId; type: string; content: Record<string, unknown>; readBy: mongoose.Types.ObjectId[]; createdAt: Date }> }) => {
+      if (!topic.messages || topic.messages.length === 0) {
+        return null;
       }
-
-      const canAccess = await topicService.canAccessTopic(topicId, context.user.userId);
-      if (!canAccess) {
-        throw new Error('Not authorized to modify this topic');
-      }
-
-      return topicService.addMember(topicId, userId);
+      const lastMsg = topic.messages[topic.messages.length - 1];
+      const sender = await UserModel.findById(lastMsg.senderId);
+      return {
+        id: lastMsg._id?.toString() || '',
+        topicId: '',
+        sender,
+        type: lastMsg.type.toUpperCase(),
+        content: lastMsg.content,
+        readBy: lastMsg.readBy.map((r) => r.toString()),
+        createdAt: lastMsg.createdAt,
+      };
     },
-
-    removeMemberFromTopic: async (
+    unreadCount: async (
+      topic: { _id: mongoose.Types.ObjectId; messages: Array<{ readBy: mongoose.Types.ObjectId[] }> },
       _: unknown,
-      { topicId, userId }: { topicId: string; userId: string },
       context: { user?: { userId: string; type: string } }
     ) => {
-      if (!context.user) {
-        throw new Error('Not authenticated');
-      }
-
-      const canAccess = await topicService.canAccessTopic(topicId, context.user.userId);
-      if (!canAccess) {
-        throw new Error('Not authorized to modify this topic');
-      }
-
-      return topicService.removeMember(topicId, userId);
+      if (!context.user) return 0;
+      return messageService.getUnreadCount(topic._id.toString(), context.user.userId);
     },
   },
 };

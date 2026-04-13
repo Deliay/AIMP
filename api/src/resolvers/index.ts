@@ -4,7 +4,7 @@ import { authRequestResolvers } from './authRequest';
 import { topicResolvers } from './topic';
 import { messageResolvers } from './message';
 
-export const resolvers = {
+const baseResolvers = {
   Query: {
     ...authResolvers.Query,
     ...subaccountResolvers.Query,
@@ -12,10 +12,16 @@ export const resolvers = {
     ...topicResolvers.Query,
     ...messageResolvers.Query,
   },
-  Mutation: {
-    ...authResolvers.Mutation,
-    ...subaccountResolvers.Mutation,
-    ...topicResolvers.Mutation,
-    ...messageResolvers.Mutation,
-  },
+  Topic: topicResolvers.Topic,
+  User: authResolvers.User,
+};
+
+const mutationResolvers = {
+  ...subaccountResolvers.Mutation,
+  ...messageResolvers.Mutation,
+};
+
+export const resolvers = {
+  ...baseResolvers,
+  ...(Object.keys(mutationResolvers).length > 0 ? { Mutation: mutationResolvers } : {}),
 };

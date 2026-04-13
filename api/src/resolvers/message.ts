@@ -12,17 +12,6 @@ export const messageResolvers = {
       }
       return messageService.getMessagesByTopic(topicId, context.user.userId);
     },
-
-    unreadCount: async (
-      _: unknown,
-      { topicId }: { topicId: string },
-      context: { user?: { userId: string; type: string } }
-    ) => {
-      if (!context.user) {
-        throw new Error('Not authenticated');
-      }
-      return messageService.getUnreadCount(topicId, context.user.userId);
-    },
   },
 
   Mutation: {

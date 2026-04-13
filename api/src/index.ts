@@ -11,14 +11,39 @@ const PORT = process.env.PORT || 4000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/aimp';
 
 const typeDefs = `
+  scalar DateTime
+  scalar JSON
+
+  enum UserType {
+    HUMAN
+    AGENT
+  }
+
+  enum SubaccountStatus {
+    PENDING
+    APPROVED
+    REJECTED
+  }
+
+  enum TopicType {
+    DIRECT
+    GROUP
+    AUTH
+  }
+
+  enum MessageType {
+    TEXT
+    FORM
+  }
+
   type User {
     id: ID!
-    email: String!
-    apiKey: String!
-    type: String!
+    email: String
+    type: UserType!
     description: String
-    createdAt: String!
-    updatedAt: String!
+    apiKey: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
   }
 
   type Subaccount {
@@ -26,76 +51,93 @@ const typeDefs = `
     parentId: ID!
     name: String!
     purpose: String!
-    apiKey: String!
-    status: String!
-    createdAt: String!
-    updatedAt: String!
+    status: SubaccountStatus!
+    apiKey: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
   }
 
   type AuthRequest {
     id: ID!
-    applicantId: ID!
+    applicant: User!
     subaccountName: String!
     subaccountPurpose: String!
     reason: String!
-    status: String!
+    status: SubaccountStatus!
     rejectReason: String
-    createdAt: String!
-    updatedAt: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
   }
 
   type Message {
     id: ID!
-    senderId: ID!
-    type: String!
-    content: String!
+    topicId: ID!
+    sender: User!
+    type: MessageType!
+    content: JSON!
     readBy: [ID!]!
-    createdAt: String!
+    createdAt: DateTime!
   }
 
   type Topic {
     id: ID!
-    type: String!
-    name: String!
     ownerId: ID!
-    members: [ID!]!
-    messages: [Message!]!
-    createdAt: String!
-    updatedAt: String!
+    type: TopicType!
+    name: String
+    members: [User!]!
+    lastMessage: Message
+    unreadCount: Int!
+    createdAt: DateTime!
+    updatedAt: DateTime!
   }
 
   type Query {
     me: User
     subaccounts: [Subaccount!]!
     subaccount(id: ID!): Subaccount
-    authRequests: [AuthRequest!]!
+    authRequests(status: SubaccountStatus): [AuthRequest!]!
     pendingAuthRequests: [AuthRequest!]!
     authRequest(id: ID!): AuthRequest
     topics: [Topic!]!
     topic(id: ID!): Topic
-    messages(topicId: ID!): Topic
-    unreadCount(topicId: ID!): Int!
+    messages(topicId: ID!, limit: Int, before: DateTime): [Message!]!
   }
 
   type Mutation {
-    refreshSession: AuthPayload!
-    createSubaccount(name: String!, purpose: String!, reason: String!): CreateSubaccountResponse!
-    approveSubaccount(authRequestId: ID!): Subaccount!
-    rejectSubaccount(authRequestId: ID!, reason: String!): Boolean!
-    createTopic(type: String!, name: String!, members: [ID!]): Topic!
-    addMemberToTopic(topicId: ID!, userId: ID!): Topic
-    removeMemberFromTopic(topicId: ID!, userId: ID!): Topic
-    sendMessage(topicId: ID!, type: String!, content: String!): Topic!
-    markAsRead(topicId: ID!): Topic!
+    createSubaccount(name: String!, purpose: String!, reason: String!): CreateSubaccountPayload!
+    approveSubaccount(requestId: ID!): ApproveAuthRequestPayload!
+    rejectSubaccount(requestId: ID!, reason: String!): RejectAuthRequestPayload!
+    sendMessage(topicId: ID!, type: MessageType!, content: JSON!): Message!
+    markAsRead(topicId: ID!): Boolean!
   }
 
   type AuthPayload {
     token: String!
+    user: User!
   }
 
-  type CreateSubaccountResponse {
-    authRequestId: String!
-    subaccountId: String!
+  type RegisterPayload {
+    userId: ID!
+    apiKey: String!
+  }
+
+  type LoginPayload {
+    token: String!
+    userId: ID!
+  }
+
+  type CreateSubaccountPayload {
+    requestId: ID!
+    status: SubaccountStatus!
+  }
+
+  type ApproveAuthRequestPayload {
+    status: SubaccountStatus!
+    subaccount: Subaccount!
+  }
+
+  type RejectAuthRequestPayload {
+    status: SubaccountStatus!
   }
 `;
 
