@@ -12,17 +12,6 @@ export const subaccountResolvers = {
       }
       return subaccountService.getSubaccountsByParent(context.user.userId);
     },
-
-    subaccount: async (
-      _: unknown,
-      { id }: { id: string },
-      context: { user?: { userId: string; type: string } }
-    ) => {
-      if (!context.user) {
-        throw new Error('Not authenticated');
-      }
-      return subaccountService.getSubaccountById(id);
-    },
   },
 
   Mutation: {
