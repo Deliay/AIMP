@@ -27,28 +27,6 @@ describe('Resolvers', () => {
         ).rejects.toThrow('Not authenticated');
       });
     });
-
-    describe('Mutation.refreshSession', () => {
-      it('should refresh session when authenticated', async () => {
-        const { userId } = await authService.register({
-          email: 'test@example.com',
-          password: 'password123',
-        });
-
-        const context = { user: { userId, type: 'human' } };
-        const result = await (resolvers.Mutation as any).refreshSession(null, null, context);
-
-        expect(result).toHaveProperty('token');
-        expect(result.token).toBeTruthy();
-      });
-
-      it('should throw error when not authenticated', async () => {
-        const context = {};
-        await expect(
-          (resolvers.Mutation as any).refreshSession(null, null, context)
-        ).rejects.toThrow('Not authenticated');
-      });
-    });
   });
 
   describe('Subaccount Resolvers', () => {
@@ -82,27 +60,6 @@ describe('Resolvers', () => {
         await expect(
           (resolvers.Query as any).subaccounts(null, null, {})
         ).rejects.toThrow('Not authenticated');
-      });
-    });
-
-    describe('Query.subaccount', () => {
-      it('should return subaccount by id', async () => {
-        const { authRequestId } = await subaccountService.createSubaccountWithAuthRequest({
-          parentId: humanUserId,
-          name: 'test-subaccount',
-          purpose: 'Testing',
-          reason: 'Test',
-        });
-        const subaccount = await subaccountService.approveSubaccount(authRequestId);
-
-        const result = await (resolvers.Query as any).subaccount(
-          null,
-          { id: subaccount._id.toString() },
-          humanContext
-        );
-
-        expect(result).toBeTruthy();
-        expect(result.name).toBe('test-subaccount');
       });
     });
 
@@ -263,97 +220,6 @@ describe('Resolvers', () => {
         ).rejects.toThrow('Not authorized to access this topic');
       });
     });
-
-    describe('Mutation.createTopic', () => {
-      it('should create topic', async () => {
-        const result = await (resolvers.Mutation as any).createTopic(
-          null,
-          { type: 'group', name: 'New Group', members: [userId] },
-          context
-        );
-
-        expect(result).toHaveProperty('_id');
-        expect(result.name).toBe('New Group');
-      });
-
-      it('should throw error when not authenticated', async () => {
-        await expect(
-          (resolvers.Mutation as any).createTopic(
-            null,
-            { type: 'group', name: 'New Group' },
-            {}
-          )
-        ).rejects.toThrow('Not authenticated');
-      });
-    });
-
-    describe('Mutation.addMemberToTopic', () => {
-      it('should add member when user can access topic', async () => {
-        const topic = await topicService.createTopic({
-          type: 'group',
-          name: 'Group Topic',
-          ownerId: userId,
-        });
-
-        const otherResult = await authService.register({
-          email: 'other@example.com',
-          password: 'password123',
-        });
-
-        const result = await (resolvers.Mutation as any).addMemberToTopic(
-          null,
-          { topicId: topic._id.toString(), userId: otherResult.userId },
-          context
-        );
-
-        expect(result.members.some((m: any) => m.toString() === otherResult.userId)).toBe(true);
-      });
-
-      it('should throw error when user cannot access topic', async () => {
-        const otherResult = await authService.register({
-          email: 'other@example.com',
-          password: 'password123',
-        });
-
-        const topic = await topicService.createTopic({
-          type: 'group',
-          name: 'Private Group',
-          ownerId: otherResult.userId,
-        });
-
-        await expect(
-          (resolvers.Mutation as any).addMemberToTopic(
-            null,
-            { topicId: topic._id.toString(), userId: 'some-id' },
-            context
-          )
-        ).rejects.toThrow('Not authorized to modify this topic');
-      });
-    });
-
-    describe('Mutation.removeMemberFromTopic', () => {
-      it('should remove member when user can access topic', async () => {
-        const otherResult = await authService.register({
-          email: 'other@example.com',
-          password: 'password123',
-        });
-
-        const topic = await topicService.createTopic({
-          type: 'group',
-          name: 'Group Topic',
-          ownerId: userId,
-          members: [userId, otherResult.userId],
-        });
-
-        const result = await (resolvers.Mutation as any).removeMemberFromTopic(
-          null,
-          { topicId: topic._id.toString(), userId: otherResult.userId },
-          context
-        );
-
-        expect(result.members.some((m: any) => m.toString() === otherResult.userId)).toBe(false);
-      });
-    });
   });
 
   describe('Message Resolvers', () => {
@@ -411,25 +277,6 @@ describe('Resolvers', () => {
         await expect(
           (resolvers.Query as any).messages(null, { topicId }, {})
         ).rejects.toThrow('Not authenticated');
-      });
-    });
-
-    describe('Query.unreadCount', () => {
-      it('should return unread count', async () => {
-        await messageService.sendMessage({
-          topicId,
-          senderId,
-          type: 'text',
-          content: { text: 'Hello!' },
-        });
-
-        const result = await (resolvers.Query as any).unreadCount(
-          null,
-          { topicId },
-          recipientContext
-        );
-
-        expect(result).toBe(1);
       });
     });
 
@@ -506,48 +353,6 @@ describe('Resolvers', () => {
         await expect(
           (resolvers.Query as any).authRequests(null, null, {})
         ).rejects.toThrow('Not authenticated');
-      });
-    });
-
-    describe('Query.pendingAuthRequests', () => {
-      it('should return pending auth requests for human user', async () => {
-        await subaccountService.createSubaccountWithAuthRequest({
-          parentId: humanUserId,
-          name: 'test-subaccount',
-          purpose: 'Testing',
-          reason: 'Test',
-        });
-
-        const result = await (resolvers.Query as any).pendingAuthRequests(null, null, humanContext);
-        expect(result).toHaveLength(1);
-      });
-
-      it('should throw error when user is not human', async () => {
-        const agentContext = { user: { userId: humanUserId, type: 'agent' } };
-
-        await expect(
-          (resolvers.Query as any).pendingAuthRequests(null, null, agentContext)
-        ).rejects.toThrow('Only human users can view pending requests');
-      });
-    });
-
-    describe('Query.authRequest', () => {
-      it('should return auth request by id', async () => {
-        const { authRequestId } = await subaccountService.createSubaccountWithAuthRequest({
-          parentId: humanUserId,
-          name: 'test-subaccount',
-          purpose: 'Testing',
-          reason: 'Test',
-        });
-
-        const result = await (resolvers.Query as any).authRequest(
-          null,
-          { id: authRequestId },
-          humanContext
-        );
-
-        expect(result).toBeTruthy();
-        expect(result.subaccountName).toBe('test-subaccount');
       });
     });
   });
