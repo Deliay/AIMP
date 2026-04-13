@@ -129,13 +129,13 @@ describe('Resolvers', () => {
 
     describe('Query.subaccounts', () => {
       it('should return subaccounts for parent', async () => {
-        const { authRequestId } = await subaccountService.createSubaccountWithAuthRequest({
+        const { requestId } = await subaccountService.createSubaccountWithAuthRequest({
           parentId: humanUserId,
           name: 'test-subaccount',
           purpose: 'Testing',
           reason: 'Test',
         });
-        await subaccountService.approveSubaccount(authRequestId);
+        await subaccountService.approveSubaccount(requestId);
 
         const result = await (resolvers.Query as any).subaccounts(null, null, humanContext);
         expect(result).toHaveLength(1);
@@ -156,8 +156,8 @@ describe('Resolvers', () => {
           humanContext
         );
 
-        expect(result).toHaveProperty('authRequestId');
-        expect(result).toHaveProperty('subaccountId');
+        expect(result).toHaveProperty('requestId');
+        expect(result).toHaveProperty('status');
 
         const topics = await topicService.getTopicsByUser(humanUserId);
         expect(topics.some(t => t.type === 'auth')).toBe(true);
@@ -176,7 +176,7 @@ describe('Resolvers', () => {
 
     describe('Mutation.approveSubaccount', () => {
       it('should approve subaccount when user is human', async () => {
-        const { authRequestId } = await subaccountService.createSubaccountWithAuthRequest({
+        const { requestId } = await subaccountService.createSubaccountWithAuthRequest({
           parentId: humanUserId,
           name: 'test-subaccount',
           purpose: 'Testing',
@@ -185,7 +185,7 @@ describe('Resolvers', () => {
 
         const result = await (resolvers.Mutation as any).approveSubaccount(
           null,
-          { authRequestId },
+          { requestId },
           humanContext
         );
 
@@ -199,7 +199,7 @@ describe('Resolvers', () => {
         await expect(
           (resolvers.Mutation as any).approveSubaccount(
             null,
-            { authRequestId: 'some-id' },
+            { requestId: 'some-id' },
             agentContext
           )
         ).rejects.toThrow('Only human users can approve subaccounts');
@@ -208,7 +208,7 @@ describe('Resolvers', () => {
 
     describe('Mutation.rejectSubaccount', () => {
       it('should reject subaccount when user is human', async () => {
-        const { authRequestId } = await subaccountService.createSubaccountWithAuthRequest({
+        const { requestId } = await subaccountService.createSubaccountWithAuthRequest({
           parentId: humanUserId,
           name: 'test-subaccount',
           purpose: 'Testing',
@@ -217,7 +217,7 @@ describe('Resolvers', () => {
 
         const result = await (resolvers.Mutation as any).rejectSubaccount(
           null,
-          { authRequestId, reason: 'Not justified' },
+          { requestId, reason: 'Not justified' },
           humanContext
         );
 
@@ -230,7 +230,7 @@ describe('Resolvers', () => {
         await expect(
           (resolvers.Mutation as any).rejectSubaccount(
             null,
-            { authRequestId: 'some-id', reason: 'reason' },
+            { requestId: 'some-id', reason: 'reason' },
             agentContext
           )
         ).rejects.toThrow('Only human users can reject subaccounts');

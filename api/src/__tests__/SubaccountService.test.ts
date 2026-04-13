@@ -24,10 +24,10 @@ describe('SubaccountService', () => {
         reason: 'Need to collect data from external sources',
       });
 
-      expect(result).toHaveProperty('authRequestId');
-      expect(result).toHaveProperty('subaccountId');
+      expect(result).toHaveProperty('requestId');
+      expect(result).toHaveProperty('status');
 
-      const authRequest = await AuthRequestModel.findById(result.authRequestId);
+      const authRequest = await AuthRequestModel.findById(result.requestId);
       expect(authRequest).toBeTruthy();
       expect(authRequest?.subaccountName).toBe('data-collector');
       expect(authRequest?.subaccountPurpose).toBe('Data collection agent');
@@ -37,14 +37,14 @@ describe('SubaccountService', () => {
 
   describe('approveSubaccount', () => {
     it('should approve pending subaccount request', async () => {
-      const { authRequestId } = await subaccountService.createSubaccountWithAuthRequest({
+      const { requestId } = await subaccountService.createSubaccountWithAuthRequest({
         parentId: parentUserId,
         name: 'data-collector',
         purpose: 'Data collection agent',
         reason: 'Need it',
       });
 
-      const subaccount = await subaccountService.approveSubaccount(authRequestId);
+      const subaccount = await subaccountService.approveSubaccount(requestId);
 
       expect(subaccount).toHaveProperty('_id');
       expect(subaccount.name).toBe('data-collector');
@@ -52,7 +52,7 @@ describe('SubaccountService', () => {
       expect(subaccount.status).toBe('approved');
       expect(subaccount.apiKey).toMatch(/^ak_/);
 
-      const authRequest = await AuthRequestModel.findById(authRequestId);
+      const authRequest = await AuthRequestModel.findById(requestId);
       expect(authRequest?.status).toBe('approved');
     });
 
@@ -63,33 +63,33 @@ describe('SubaccountService', () => {
     });
 
     it('should throw error if request is not pending', async () => {
-      const { authRequestId } = await subaccountService.createSubaccountWithAuthRequest({
+      const { requestId } = await subaccountService.createSubaccountWithAuthRequest({
         parentId: parentUserId,
         name: 'data-collector',
         purpose: 'Data collection agent',
         reason: 'Need it',
       });
 
-      await subaccountService.approveSubaccount(authRequestId);
+      await subaccountService.approveSubaccount(requestId);
 
       await expect(
-        subaccountService.approveSubaccount(authRequestId)
+        subaccountService.approveSubaccount(requestId)
       ).rejects.toThrow('Auth request is not pending');
     });
   });
 
   describe('rejectSubaccount', () => {
     it('should reject pending subaccount request', async () => {
-      const { authRequestId } = await subaccountService.createSubaccountWithAuthRequest({
+      const { requestId } = await subaccountService.createSubaccountWithAuthRequest({
         parentId: parentUserId,
         name: 'data-collector',
         purpose: 'Data collection agent',
         reason: 'Need it',
       });
 
-      await subaccountService.rejectSubaccount(authRequestId, 'Insufficient justification');
+      await subaccountService.rejectSubaccount(requestId, 'Insufficient justification');
 
-      const authRequest = await AuthRequestModel.findById(authRequestId);
+      const authRequest = await AuthRequestModel.findById(requestId);
       expect(authRequest?.status).toBe('rejected');
       expect(authRequest?.rejectReason).toBe('Insufficient justification');
     });
@@ -103,14 +103,14 @@ describe('SubaccountService', () => {
 
   describe('getSubaccountsByParent', () => {
     it('should return approved subaccounts for parent', async () => {
-      const { authRequestId: ar1 } = await subaccountService.createSubaccountWithAuthRequest({
+      const { requestId: ar1 } = await subaccountService.createSubaccountWithAuthRequest({
         parentId: parentUserId,
         name: 'subaccount-1',
         purpose: 'Purpose 1',
         reason: 'Reason 1',
       });
 
-      const { authRequestId: ar2 } = await subaccountService.createSubaccountWithAuthRequest({
+      const { requestId: ar2 } = await subaccountService.createSubaccountWithAuthRequest({
         parentId: parentUserId,
         name: 'subaccount-2',
         purpose: 'Purpose 2',
@@ -132,14 +132,14 @@ describe('SubaccountService', () => {
 
   describe('getSubaccountById', () => {
     it('should return subaccount by id', async () => {
-      const { authRequestId } = await subaccountService.createSubaccountWithAuthRequest({
+      const { requestId } = await subaccountService.createSubaccountWithAuthRequest({
         parentId: parentUserId,
         name: 'data-collector',
         purpose: 'Data collection agent',
         reason: 'Need it',
       });
 
-      const subaccount = await subaccountService.approveSubaccount(authRequestId);
+      const subaccount = await subaccountService.approveSubaccount(requestId);
       const found = await subaccountService.getSubaccountById(subaccount._id.toString());
 
       expect(found).toBeTruthy();
@@ -154,14 +154,14 @@ describe('SubaccountService', () => {
 
   describe('approveSubaccount - user creation', () => {
     it('should create User with type=agent when approving', async () => {
-      const { authRequestId } = await subaccountService.createSubaccountWithAuthRequest({
+      const { requestId } = await subaccountService.createSubaccountWithAuthRequest({
         parentId: parentUserId,
         name: 'agent-subaccount',
         purpose: 'Test agent',
         reason: 'Testing',
       });
 
-      const subaccount = await subaccountService.approveSubaccount(authRequestId);
+      const subaccount = await subaccountService.approveSubaccount(requestId);
 
       const agentUser = await UserModel.findOne({ email: `subaccount_${subaccount._id}@aimp.local` });
       expect(agentUser).toBeTruthy();

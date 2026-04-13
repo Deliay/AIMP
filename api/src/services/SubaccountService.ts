@@ -14,7 +14,7 @@ function isValidObjectId(id: string): boolean {
 }
 
 export class SubaccountService {
-  async createSubaccountWithAuthRequest(input: CreateSubaccountInput): Promise<{ authRequestId: string; subaccountId: string }> {
+  async createSubaccountWithAuthRequest(input: CreateSubaccountInput): Promise<{ requestId: string; status: string }> {
     const authRequest = await AuthRequestModel.create({
       applicantId: input.parentId,
       subaccountName: input.name,
@@ -24,8 +24,8 @@ export class SubaccountService {
     });
 
     return {
-      authRequestId: authRequest._id.toString(),
-      subaccountId: authRequest._id.toString(),
+      requestId: authRequest._id.toString(),
+      status: 'PENDING',
     };
   }
 

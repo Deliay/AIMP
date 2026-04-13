@@ -31,14 +31,14 @@ export const subaccountResolvers = {
         reason,
       });
 
-      await topicService.createAuthTopic(result.authRequestId, context.user.userId);
+      await topicService.createAuthTopic(result.requestId, context.user.userId);
 
       return result;
     },
 
     approveSubaccount: async (
       _: unknown,
-      { authRequestId }: { authRequestId: string },
+      { requestId }: { requestId: string },
       context: { user?: { userId: string; type: string } }
     ) => {
       if (!context.user) {
@@ -47,12 +47,12 @@ export const subaccountResolvers = {
       if (context.user.type !== 'human') {
         throw new Error('Only human users can approve subaccounts');
       }
-      return subaccountService.approveSubaccount(authRequestId);
+      return subaccountService.approveSubaccount(requestId);
     },
 
     rejectSubaccount: async (
       _: unknown,
-      { authRequestId, reason }: { authRequestId: string; reason: string },
+      { requestId, reason }: { requestId: string; reason: string },
       context: { user?: { userId: string; type: string } }
     ) => {
       if (!context.user) {
@@ -61,7 +61,7 @@ export const subaccountResolvers = {
       if (context.user.type !== 'human') {
         throw new Error('Only human users can reject subaccounts');
       }
-      await subaccountService.rejectSubaccount(authRequestId, reason);
+      await subaccountService.rejectSubaccount(requestId, reason);
       return true;
     },
   },

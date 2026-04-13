@@ -132,35 +132,34 @@ npx playwright test --generate
 
 ## 2. API 契约测试 (`test/api/`)
 
-### 2.1 测试依据
+### 2.1 测试结构
 
-API 测试必须严格按照 `contract/` 下的 Schema 定义编写：
+```
+test/api/
+├── graphql.test.ts   # GraphQL + REST Auth API 契约测试
+└── jest.config.js    # Jest 配置
+```
 
-| Schema 文件 | 测试范围 |
-|------------|---------|
-| [[../contract/aimp.schema]] | GraphQL API 完整覆盖 |
-| [[../contract/aimp.auth.yaml]] | REST Auth API 完整覆盖 |
+### 2.2 测试执行
 
-### 2.2 GraphQL API 测试 (`contract/aimp.schema`)
-
-测试必须覆盖所有 Query 和 Mutation，具体测试用例参见 `contract/` 下的 Schema 定义。
-
-### 2.3 REST Auth API 测试 (`contract/aimp.auth.yaml`)
-
-REST Auth API 测试覆盖 `contract/aimp.auth.yaml` 中定义的所有端点。
-
-### 2.4 测试执行
+**前置条件**：必须先启动 Aspire 服务。
 
 ```bash
-# 运行 API 测试
-npm run test:api
+# 1. 启动 Aspire
+aspire start
 
-# 运行 GraphQL schema 验证
-npm run test:api:graphql
+# 2. 获取 API endpoint
+aspire describe api
 
-# 运行 REST API 契约验证
-npm run test:api:rest
+# 3. 设置环境变量并运行测试
+export API_URL=<api_endpoint>
+cd ../test/api && npm test
+
+# 4. 停止 Aspire
+aspire stop
 ```
+
+测试使用 `supertest` 对运行中的 API 服务发起真实 HTTP 请求，验证 GraphQL 和 REST Auth API 的契约合规性。
 
 ---
 
