@@ -1,10 +1,12 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { MessageSquare, Settings, Shield } from 'lucide-react';
 import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
 
 export function Sidebar() {
-  const { topicId } = useParams<{ topicId: string }>();
+  const location = useLocation();
+
+  const isActive = (path: string) => location.pathname.startsWith(path);
 
   return (
     <div className="w-80 border-r border-[#e5e4e7] bg-white flex flex-col">
@@ -16,7 +18,7 @@ export function Sidebar() {
               variant="ghost"
               className={cn(
                 'w-full justify-start gap-3',
-                !topicId && 'bg-gray-100'
+                isActive('/chats') && 'bg-gray-100'
               )}
             >
               <MessageSquare className="h-5 w-5" />
@@ -24,13 +26,25 @@ export function Sidebar() {
             </Button>
           </Link>
           <Link to="/auth-requests">
-            <Button variant="ghost" className="w-full justify-start gap-3">
+            <Button
+              variant="ghost"
+              className={cn(
+                'w-full justify-start gap-3',
+                isActive('/auth-requests') && 'bg-gray-100'
+              )}
+            >
               <Shield className="h-5 w-5" />
               Auth Requests
             </Button>
           </Link>
           <Link to="/settings">
-            <Button variant="ghost" className="w-full justify-start gap-3">
+            <Button
+              variant="ghost"
+              className={cn(
+                'w-full justify-start gap-3',
+                isActive('/settings') && 'bg-gray-100'
+              )}
+            >
               <Settings className="h-5 w-5" />
               Settings
             </Button>
