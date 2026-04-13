@@ -85,6 +85,22 @@ export class AuthService {
     const token = generateJwt({ userId: user._id.toString(), type: user.type });
     return { token };
   }
+
+  async regenerateApiKey(userId: string): Promise<{ apiKey: string }> {
+    if (!isValidObjectId(userId)) {
+      throw new Error('User not found');
+    }
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const newApiKey = generateApiKey();
+    user.apiKey = newApiKey;
+    await user.save();
+
+    return { apiKey: newApiKey };
+  }
 }
 
 export const authService = new AuthService();

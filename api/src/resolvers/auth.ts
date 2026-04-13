@@ -11,6 +11,15 @@ export const authResolvers = {
     },
   },
 
+  Mutation: {
+    regenerateApiKey: async (_: unknown, __: unknown, context: { user?: { userId: string; type: string } }) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+      return authService.regenerateApiKey(context.user.userId);
+    },
+  },
+
   User: {
     id: (user: { _id: mongoose.Types.ObjectId }) => user._id.toString(),
     email: (user: { email?: string }) => user.email,

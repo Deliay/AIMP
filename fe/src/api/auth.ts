@@ -56,4 +56,17 @@ export const authApi = {
     }
     return data.data.me;
   },
+
+  regenerateApiKey: async (): Promise<{ apiKey: string }> => {
+    const response = await graphqlClient.post('', {
+      json: {
+        query: `mutation { regenerateApiKey { apiKey } }`,
+      },
+    });
+    const data: GraphQLResponse<{ regenerateApiKey: { apiKey: string } }> = await response.json();
+    if (data.errors?.length) {
+      throw new Error(data.errors[0].message);
+    }
+    return data.data!.regenerateApiKey;
+  },
 };

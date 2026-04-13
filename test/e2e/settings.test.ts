@@ -21,6 +21,15 @@ test.describe('设置页面', () => {
     await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
   });
 
+  test('设置页面进入时拉取用户信息', async ({ page, authenticated }) => {
+    await page.goto('/settings');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByText('Email')).toBeVisible();
+    await expect(page.getByText('Account Type')).toBeVisible();
+    await expect(page.getByText('API Key')).toBeVisible();
+  });
+
   test('设置页面显示API Key', async ({ page, authenticated }) => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');

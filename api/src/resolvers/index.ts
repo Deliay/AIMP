@@ -17,6 +17,7 @@ const baseResolvers = {
 };
 
 const mutationResolvers = {
+  ...authResolvers.Mutation,
   ...subaccountResolvers.Mutation,
   ...messageResolvers.Mutation,
 };

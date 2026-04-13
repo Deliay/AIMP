@@ -2,13 +2,29 @@ import { useAuthStore } from '../hooks/use-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
-import { Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { Copy, Check, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from '../components/ui/sidebar';
+import { authApi } from '../api/auth';
 
 export function SettingsPage() {
-  const { user } = useAuthStore();
+  const { user, checkAuth, isLoading } = useAuthStore();
   const [copied, setCopied] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  const handleRegenerateApiKey = async () => {
+    setIsRegenerating(true);
+    try {
+      await authApi.regenerateApiKey();
+      await checkAuth();
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
 
   const handleCopyApiKey = async () => {
     if (user?.apiKey) {
@@ -48,15 +64,26 @@ export function SettingsPage() {
                     <code className="flex-1 px-3 py-2 bg-gray-100 rounded text-sm font-mono">
                       {user?.apiKey || 'N/A'}
                     </code>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCopyApiKey}
-                      disabled={!user?.apiKey}
-                    >
-                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      {copied ? 'Copied' : 'Copy'}
-                    </Button>
+                    {user?.apiKey ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCopyApiKey}
+                      >
+                        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        {copied ? 'Copied' : 'Copy'}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={handleRegenerateApiKey}
+                        disabled={isRegenerating || isLoading}
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                        {isRegenerating ? 'Generating...' : 'Generate'}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>

@@ -28,6 +28,10 @@ type AuthPayload {
   user: User!
 }
 
+type ApiKeyPayload {
+  apiKey: String!
+}
+
 type RegisterPayload {
   userId: ID!
   apiKey: String!
@@ -148,4 +152,5 @@ type Mutation {
   rejectSubaccount(requestId: ID!, reason: String!): RejectAuthRequestPayload!
   sendMessage(topicId: ID!, type: MessageType!, content: JSON!): Message!
   markAsRead(topicId: ID!): Boolean!
+  regenerateApiKey: ApiKeyPayload!
 }
