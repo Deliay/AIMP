@@ -1,1 +1,5 @@
-declare const __API_HTTP__: string;
+declare global {
+  var __API_HTTP__: string;
+}
+
+export {};

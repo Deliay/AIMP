@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 
-globalThis.__API_HTTP__ = ''
+globalThis.__API_HTTP__ = '';
 
 globalThis.sessionStorage = {
   getItem: vi.fn(),

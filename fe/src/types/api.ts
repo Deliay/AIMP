@@ -4,6 +4,8 @@ export type SubaccountStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export type TopicType = 'DIRECT' | 'GROUP' | 'AUTH';
 
+export type TopicStatus = 'PENDING' | 'ACTIVE' | 'REJECTED';
+
 export type MessageType = 'TEXT' | 'FORM';
 
 export interface User {
@@ -69,8 +71,11 @@ export interface Message {
 export interface Topic {
   id: string;
   ownerId: string;
+  slug: string;
   type: TopicType;
-  name: string | null;
+  name: string;
+  description: string;
+  status: TopicStatus;
   members: User[];
   lastMessage: Message | null;
   unreadCount: number;
@@ -113,4 +118,22 @@ export interface GraphQLResponse<T> {
     message: string;
     path?: string[];
   }>;
+}
+
+export interface CreateTopicPayload {
+  requestId: string | null;
+  status: TopicStatus;
+  topic: Topic | null;
+}
+
+export interface TopicSearchResult {
+  slug: string;
+  name: string;
+  description: string;
+  relateScore: number;
+}
+
+export interface ClearTopicMessagesPayload {
+  status: string;
+  clearedCount: number;
 }

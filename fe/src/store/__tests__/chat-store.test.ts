@@ -30,7 +30,7 @@ describe('store/chat-store', () => {
       const { useChatStore } = await import('../chat-store')
       const { chatApi } = await import('../../api/chat')
       const mockTopics = [
-        { id: '1', ownerId: 'u1', type: 'DIRECT' as const, name: 'Test', members: [], lastMessage: null, unreadCount: 1, createdAt: '', updatedAt: '' },
+        { id: '1', ownerId: 'u1', slug: 'test', type: 'DIRECT' as const, name: 'Test', description: '', status: 'ACTIVE' as const, members: [], lastMessage: null, unreadCount: 1, createdAt: '', updatedAt: '' },
       ]
 
       vi.mocked(chatApi.getTopics).mockResolvedValue(mockTopics)
@@ -158,7 +158,7 @@ describe('store/chat-store', () => {
       const { useChatStore } = await import('../chat-store')
       const { chatApi } = await import('../../api/chat')
       const mockTopics = [
-        { id: '1', ownerId: 'u1', type: 'DIRECT' as const, name: 'Test', members: [], lastMessage: null, unreadCount: 5, createdAt: '', updatedAt: '' },
+        { id: '1', ownerId: 'u1', slug: 'test', type: 'DIRECT' as const, name: 'Test', description: '', status: 'ACTIVE' as const, members: [], lastMessage: null, unreadCount: 5, createdAt: '', updatedAt: '' },
       ]
 
       useChatStore.setState({ topics: mockTopics })
