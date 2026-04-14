@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { AuthRequestList } from '../components/features/auth-request/auth-request-list';
 import { Button } from '../components/ui/button';
 import { Sidebar } from '../components/ui/sidebar';
-import type { SubaccountStatus } from '../types/api';
+import type { AgentBotStatus } from '../types/api';
 
 export function AuthRequestsPage() {
-  const [filterStatus, setFilterStatus] = useState<SubaccountStatus | undefined>(undefined);
+  const [filterStatus, setFilterStatus] = useState<AgentBotStatus | undefined>(undefined);
 
   return (
     <div className="flex h-full">

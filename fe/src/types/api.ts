@@ -1,6 +1,6 @@
 export type UserType = 'HUMAN' | 'AGENT';
 
-export type SubaccountStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type AgentBotStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export type TopicType = 'DIRECT' | 'GROUP' | 'AUTH';
 
@@ -18,12 +18,12 @@ export interface User {
   updatedAt: string;
 }
 
-export interface Subaccount {
+export interface AgentBot {
   id: string;
   parentId: string;
   name: string;
   purpose: string;
-  status: SubaccountStatus;
+  status: AgentBotStatus;
   apiKey: string | null;
   createdAt: string;
   updatedAt: string;
@@ -32,10 +32,10 @@ export interface Subaccount {
 export interface AuthRequest {
   id: string;
   applicant: User;
-  subaccountName: string;
-  subaccountPurpose: string;
+  agentBotName: string;
+  agentBotPurpose: string;
   reason: string;
-  status: SubaccountStatus;
+  status: AgentBotStatus;
   rejectReason: string | null;
   createdAt: string;
   updatedAt: string;
@@ -98,18 +98,18 @@ export interface LoginPayload {
   userId: string;
 }
 
-export interface CreateSubaccountPayload {
+export interface CreateAgentBotPayload {
   requestId: string;
-  status: SubaccountStatus;
+  status: AgentBotStatus;
 }
 
 export interface ApproveAuthRequestPayload {
-  status: SubaccountStatus;
-  subaccount: Subaccount;
+  status: AgentBotStatus;
+  agentBot: AgentBot;
 }
 
 export interface RejectAuthRequestPayload {
-  status: SubaccountStatus;
+  status: AgentBotStatus;
 }
 
 export interface GraphQLResponse<T> {

@@ -1,27 +1,27 @@
 import { graphqlClient } from './client';
-import type { ApproveAuthRequestPayload, AuthRequest, GraphQLResponse, RejectAuthRequestPayload, SubaccountStatus } from '../types/api';
+import type { ApproveAuthRequestPayload, AuthRequest, GraphQLResponse, RejectAuthRequestPayload, AgentBotStatus } from '../types/api';
 
 interface AuthRequestsResponse {
   authRequests: AuthRequest[];
 }
 
 interface ApproveResponse {
-  approveSubaccount: ApproveAuthRequestPayload;
+  approveAgentBot: ApproveAuthRequestPayload;
 }
 
 interface RejectResponse {
-  rejectSubaccount: RejectAuthRequestPayload;
+  rejectAgentBot: RejectAuthRequestPayload;
 }
 
-interface CreateSubaccountResponse {
-  createSubaccount: { requestId: string; status: SubaccountStatus };
+interface CreateAgentBotResponse {
+  createAgentBot: { requestId: string; status: AgentBotStatus };
 }
 
 export const authRequestApi = {
-  getAuthRequests: async (status?: SubaccountStatus): Promise<AuthRequest[]> => {
+  getAuthRequests: async (status?: AgentBotStatus): Promise<AuthRequest[]> => {
     const response = await graphqlClient.post('', {
       json: {
-        query: `query GetAuthRequests($status: SubaccountStatus) { authRequests(status: $status) { id applicant { id email type description createdAt updatedAt } subaccountName subaccountPurpose reason status rejectReason createdAt updatedAt } }`,
+        query: `query GetAuthRequests($status: AgentBotStatus) { authRequests(status: $status) { id applicant { id email type description createdAt updatedAt } agentBotName agentBotPurpose reason status rejectReason createdAt updatedAt } }`,
         variables: { status },
       },
     });
@@ -32,24 +32,24 @@ export const authRequestApi = {
     return data.data!.authRequests;
   },
 
-  createSubaccount: async (name: string, purpose: string, reason: string): Promise<{ requestId: string; status: SubaccountStatus }> => {
+  createAgentBot: async (name: string, purpose: string, reason: string): Promise<{ requestId: string; status: AgentBotStatus }> => {
     const response = await graphqlClient.post('', {
       json: {
-        query: `mutation CreateSubaccount($name: String!, $purpose: String!, $reason: String!) { createSubaccount(name: $name, purpose: $purpose, reason: $reason) { requestId status } }`,
+        query: `mutation CreateAgentBot($name: String!, $purpose: String!, $reason: String!) { createAgentBot(name: $name, purpose: $purpose, reason: $reason) { requestId status } }`,
         variables: { name, purpose, reason },
       },
     });
-    const data: GraphQLResponse<CreateSubaccountResponse> = await response.json();
+    const data: GraphQLResponse<CreateAgentBotResponse> = await response.json();
     if (data.errors?.length) {
       throw new Error(data.errors[0].message);
     }
-    return data.data!.createSubaccount;
+    return data.data!.createAgentBot;
   },
 
   approveRequest: async (requestId: string): Promise<ApproveAuthRequestPayload> => {
     const response = await graphqlClient.post('', {
       json: {
-        query: `mutation ApproveSubaccount($requestId: ID!) { approveSubaccount(requestId: $requestId) { status subaccount { id parentId name purpose status apiKey createdAt updatedAt } } }`,
+        query: `mutation ApproveAgentBot($requestId: ID!) { approveAgentBot(requestId: $requestId) { status agentBot { id parentId name purpose status apiKey createdAt updatedAt } } }`,
         variables: { requestId },
       },
     });
@@ -57,13 +57,13 @@ export const authRequestApi = {
     if (data.errors?.length) {
       throw new Error(data.errors[0].message);
     }
-    return data.data!.approveSubaccount;
+    return data.data!.approveAgentBot;
   },
 
   rejectRequest: async (requestId: string, reason: string): Promise<RejectAuthRequestPayload> => {
     const response = await graphqlClient.post('', {
       json: {
-        query: `mutation RejectSubaccount($requestId: ID!, $reason: String!) { rejectSubaccount(requestId: $requestId, reason: $reason) { status } }`,
+        query: `mutation RejectAgentBot($requestId: ID!, $reason: String!) { rejectAgentBot(requestId: $requestId, reason: $reason) { status } }`,
         variables: { requestId, reason },
       },
     });
@@ -71,6 +71,6 @@ export const authRequestApi = {
     if (data.errors?.length) {
       throw new Error(data.errors[0].message);
     }
-    return data.data!.rejectSubaccount;
+    return data.data!.rejectAgentBot;
   },
 };

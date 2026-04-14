@@ -6,7 +6,7 @@ vi.mock('../../api/auth-request', () => ({
     getAuthRequests: vi.fn(),
     approveRequest: vi.fn(),
     rejectRequest: vi.fn(),
-    createSubaccount: vi.fn(),
+    createAgentBot: vi.fn(),
   },
 }))
 
@@ -31,8 +31,8 @@ describe('store/auth-request-store', () => {
         {
           id: '1',
           applicant: { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' },
-          subaccountName: 'Test',
-          subaccountPurpose: 'Testing',
+          agentBotName: 'Test',
+          agentBotPurpose: 'Testing',
           reason: 'Need access',
           status: 'PENDING' as const,
           rejectReason: null,
@@ -89,8 +89,8 @@ describe('store/auth-request-store', () => {
         {
           id: '1',
           applicant: { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' },
-          subaccountName: 'Test',
-          subaccountPurpose: 'Testing',
+          agentBotName: 'Test',
+          agentBotPurpose: 'Testing',
           reason: 'Need access',
           status: 'PENDING' as const,
           rejectReason: null,
@@ -100,7 +100,7 @@ describe('store/auth-request-store', () => {
       ]
 
       useAuthRequestStore.setState({ requests: mockRequests })
-      vi.mocked(authRequestApi.approveRequest).mockResolvedValue({ status: 'APPROVED', subaccount: { id: 'sa1', parentId: 'u1', name: 'Test', purpose: 'Testing', status: 'APPROVED', apiKey: null, createdAt: '', updatedAt: '' } })
+      vi.mocked(authRequestApi.approveRequest).mockResolvedValue({ status: 'APPROVED', agentBot: { id: 'sa1', parentId: 'u1', name: 'Test', purpose: 'Testing', status: 'APPROVED', apiKey: null, createdAt: '', updatedAt: '' } })
 
       await act(async () => {
         await useAuthRequestStore.getState().approveRequest('1')
@@ -119,8 +119,8 @@ describe('store/auth-request-store', () => {
         {
           id: '1',
           applicant: { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, apiKey: null, createdAt: '', updatedAt: '' },
-          subaccountName: 'Test',
-          subaccountPurpose: 'Testing',
+          agentBotName: 'Test',
+          agentBotPurpose: 'Testing',
           reason: 'Need access',
           status: 'PENDING' as const,
           rejectReason: null,
@@ -142,18 +142,18 @@ describe('store/auth-request-store', () => {
     })
   })
 
-  describe('createSubaccount', () => {
-    it('should create subaccount successfully', async () => {
+  describe('createAgentBot', () => {
+    it('should create agent_bot successfully', async () => {
       const { useAuthRequestStore } = await import('../auth-request-store')
       const { authRequestApi } = await import('../../api/auth-request')
 
-      vi.mocked(authRequestApi.createSubaccount).mockResolvedValue({ requestId: 'req-1', status: 'PENDING' })
+      vi.mocked(authRequestApi.createAgentBot).mockResolvedValue({ requestId: 'req-1', status: 'PENDING' })
 
       await act(async () => {
-        await useAuthRequestStore.getState().createSubaccount('name', 'purpose', 'reason')
+        await useAuthRequestStore.getState().createAgentBot('name', 'purpose', 'reason')
       })
 
-      expect(authRequestApi.createSubaccount).toHaveBeenCalledWith('name', 'purpose', 'reason')
+      expect(authRequestApi.createAgentBot).toHaveBeenCalledWith('name', 'purpose', 'reason')
     })
   })
 })

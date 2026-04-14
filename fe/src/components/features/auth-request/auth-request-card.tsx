@@ -33,7 +33,7 @@ export function AuthRequestCard({ request, onApprove, onReject }: AuthRequestCar
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>{request.subaccountName}</CardTitle>
+            <CardTitle>{request.agentBotName}</CardTitle>
             <CardDescription>Requested by {request.applicant.email}</CardDescription>
           </div>
           <Badge variant={statusVariant}>{request.status}</Badge>
@@ -42,7 +42,7 @@ export function AuthRequestCard({ request, onApprove, onReject }: AuthRequestCar
       <CardContent className="space-y-4">
         <div>
           <p className="text-sm font-medium">Purpose</p>
-          <p className="text-sm text-[#6b6375]">{request.subaccountPurpose}</p>
+          <p className="text-sm text-[#6b6375]">{request.agentBotPurpose}</p>
         </div>
         <div>
           <p className="text-sm font-medium">Reason</p>

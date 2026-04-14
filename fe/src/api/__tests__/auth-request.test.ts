@@ -22,8 +22,8 @@ describe('api/auth-request', () => {
         {
           id: '1',
           applicant: { id: 'u1', email: 'test@example.com', type: 'HUMAN' as const, description: null, createdAt: '', updatedAt: '' },
-          subaccountName: 'Test Subaccount',
-          subaccountPurpose: 'Testing',
+          agentBotName: 'Test AgentBot',
+          agentBotPurpose: 'Testing',
           reason: 'Need access',
           status: 'PENDING' as const,
           rejectReason: null,
@@ -47,13 +47,13 @@ describe('api/auth-request', () => {
     })
   })
 
-  describe('authRequestApi.createSubaccount', () => {
-    it('should create subaccount and return requestId and status', async () => {
+  describe('authRequestApi.createAgentBot', () => {
+    it('should create agent_bot and return requestId and status', async () => {
       const { authRequestApi } = await import('../auth-request')
       const expectedResponse = { requestId: 'req-1', status: 'PENDING' as const }
-      mockJson.mockResolvedValue({ data: { createSubaccount: expectedResponse } })
+      mockJson.mockResolvedValue({ data: { createAgentBot: expectedResponse } })
 
-      const result = await authRequestApi.createSubaccount('name', 'purpose', 'reason')
+      const result = await authRequestApi.createAgentBot('name', 'purpose', 'reason')
 
       expect(result).toEqual(expectedResponse)
     })
@@ -64,9 +64,9 @@ describe('api/auth-request', () => {
       const { authRequestApi } = await import('../auth-request')
       const expectedResponse = {
         status: 'APPROVED' as const,
-        subaccount: { id: 'sa-1', parentId: 'u1', name: 'Test', purpose: 'Testing', status: 'APPROVED' as const, apiKey: 'ak_test', createdAt: '', updatedAt: '' },
+        agentBot: { id: 'sa-1', parentId: 'u1', name: 'Test', purpose: 'Testing', status: 'APPROVED' as const, apiKey: 'ak_test', createdAt: '', updatedAt: '' },
       }
-      mockJson.mockResolvedValue({ data: { approveSubaccount: expectedResponse } })
+      mockJson.mockResolvedValue({ data: { approveAgentBot: expectedResponse } })
 
       const result = await authRequestApi.approveRequest('req-1')
 
@@ -78,7 +78,7 @@ describe('api/auth-request', () => {
     it('should reject request and return payload', async () => {
       const { authRequestApi } = await import('../auth-request')
       const expectedResponse = { status: 'REJECTED' as const }
-      mockJson.mockResolvedValue({ data: { rejectSubaccount: expectedResponse } })
+      mockJson.mockResolvedValue({ data: { rejectAgentBot: expectedResponse } })
 
       const result = await authRequestApi.rejectRequest('req-1', 'reason')
 
