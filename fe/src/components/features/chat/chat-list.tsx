@@ -41,7 +41,10 @@ export function ChatList({ topics, currentTopicId }: ChatListProps) {
             </div>
             {topic.lastMessage && (
               <p className="text-sm text-[#6b6375] truncate">
-                {topic.lastMessage.sender.email?.split('@')[0]}:{' '}
+                {topic.lastMessage.sender.__typename === 'User'
+                  ? topic.lastMessage.sender.email?.split('@')[0]
+                  : topic.lastMessage.sender.name}
+                :{' '}
                 {topic.lastMessage.type === 'TEXT'
                   ? (topic.lastMessage.content as { content: string }).content
                   : '[Form]'}

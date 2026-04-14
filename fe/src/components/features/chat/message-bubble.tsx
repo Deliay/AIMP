@@ -12,7 +12,10 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
-  const senderName = message.sender.email?.split('@')[0] || 'Unknown';
+  const senderName = message.sender.__typename === 'User' 
+    ? message.sender.email?.split('@')[0] || 'Unknown'
+    : message.sender.name || 'Unknown';
+  const isAgent = message.sender.__typename === 'AgentBot' || message.sender.type === 'AGENT';
 
   const renderContent = () => {
     if (message.type === 'FORM') {
@@ -49,8 +52,8 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
         {!isOwn && (
           <span className="text-xs text-[#6b6375]">{senderName}</span>
         )}
-        <Badge variant={message.sender.type === 'AGENT' ? 'secondary' : 'outline'}>
-          {message.sender.type === 'AGENT' ? 'Agent' : 'Human'}
+        <Badge variant={isAgent ? 'secondary' : 'outline'}>
+          {isAgent ? 'Agent' : 'Human'}
         </Badge>
       </div>
       <div

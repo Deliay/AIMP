@@ -58,10 +58,12 @@ export interface TextContent {
   content: string;
 }
 
+export type MessageSender = (User & { __typename: 'User' }) | (AgentBot & { __typename: 'AgentBot' });
+
 export interface Message {
   id: string;
   topicId: string;
-  sender: User;
+  sender: MessageSender;
   type: MessageType;
   content: TextContent | FormContent;
   readBy: string[];

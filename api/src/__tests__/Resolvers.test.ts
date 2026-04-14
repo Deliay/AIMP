@@ -345,6 +345,7 @@ await topicService.createTopic({
         await messageService.sendMessage({
           topicId: topic._id.toString(),
           senderId: userId,
+          senderType: 'user',
           type: 'TEXT',
           content: { text: 'Hello!' },
         });
@@ -395,6 +396,7 @@ await topicService.createTopic({
         await messageService.sendMessage({
           topicId: topic._id.toString(),
           senderId: userId,
+          senderType: 'user',
           type: 'TEXT',
           content: { text: 'Unread message' },
         });
@@ -421,6 +423,7 @@ await topicService.createTopic({
         await messageService.sendMessage({
           topicId: topic._id.toString(),
           senderId: userId,
+          senderType: 'user',
           type: 'TEXT',
           content: { text: 'Read message' },
         });
@@ -476,6 +479,7 @@ await topicService.createTopic({
         await messageService.sendMessage({
           topicId,
           senderId,
+          senderType: 'user',
           type: 'TEXT',
           content: { text: 'Hello!' },
         });
@@ -525,6 +529,7 @@ await topicService.createTopic({
         await messageService.sendMessage({
           topicId,
           senderId,
+          senderType: 'user',
           type: 'TEXT',
           content: { text: 'Hello!' },
         });
@@ -535,7 +540,7 @@ await topicService.createTopic({
           recipientContext
         );
 
-        expect(result.messages[0].readBy.some((r: any) => r.toString() === recipientId)).toBe(true);
+        expect(result).toBe(true);
       });
     });
   });

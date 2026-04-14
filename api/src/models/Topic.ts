@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IMessage {
   senderId: mongoose.Types.ObjectId;
+  senderType: 'user' | 'agentbot';
   type: 'TEXT' | 'FORM';
   content: Record<string, unknown>;
   readBy: mongoose.Types.ObjectId[];
@@ -25,7 +26,8 @@ export type TopicDocument = Document & ITopic;
 
 const MessageSchema = new Schema<IMessage>(
   {
-    senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    senderId: { type: Schema.Types.ObjectId, required: true },
+    senderType: { type: String, enum: ['user', 'agentbot'], required: true },
     type: { type: String, enum: ['TEXT', 'FORM'], required: true },
     content: { type: Schema.Types.Mixed, required: true },
     readBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],

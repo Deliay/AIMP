@@ -19,8 +19,10 @@ interface Message {
   type: string
   content: unknown
   sender: {
+    __typename: string
     id: string
-    email: string | null
+    email?: string | null
+    name?: string
   }
   createdAt: string
 }
@@ -96,8 +98,15 @@ export const makeChatReceiveCommand = (program: Command) => {
               type
               content
               sender {
-                id
-                email
+                __typename
+                ... on User {
+                  id
+                  email
+                }
+                ... on AgentBot {
+                  id
+                  name
+                }
               }
               createdAt
             }
@@ -112,7 +121,7 @@ export const makeChatReceiveCommand = (program: Command) => {
         }
 
         for (const msg of messagesResponse.messages) {
-          const senderId = msg.sender.email || msg.sender.id
+          const senderId = msg.sender.__typename === 'User' ? msg.sender.email || msg.sender.id : msg.sender.name || msg.sender.id
           console.log(chalk.blue(`\n收到来自 ${senderId} 的消息:\n`))
 
           if (msg.type === 'TEXT') {

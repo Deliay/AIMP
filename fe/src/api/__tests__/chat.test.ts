@@ -75,7 +75,7 @@ describe('api/chat', () => {
   describe('chatApi.sendMessage', () => {
     it('should send message and return created message', async () => {
       const { chatApi } = await import('../chat')
-      const mockMessage = { id: 'm1', topicId: '1', sender: { id: 'u1', email: null, type: 'HUMAN', description: null, createdAt: '', updatedAt: '' }, type: 'TEXT' as const, content: { content: 'Hello' }, readBy: [], createdAt: '' }
+      const mockMessage = { id: 'm1', topicId: '1', sender: { __typename: 'User' as const, id: 'u1', email: null, type: 'HUMAN', description: null, createdAt: '', updatedAt: '' }, type: 'TEXT' as const, content: { content: 'Hello' }, readBy: [], createdAt: '' }
       mockJson.mockResolvedValue({ data: { sendMessage: mockMessage } })
 
       const result = await chatApi.sendMessage('1', 'TEXT', { content: 'Hello' })

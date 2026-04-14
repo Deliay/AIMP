@@ -152,21 +152,4 @@ describe('AgentBotService', () => {
     });
   });
 
-  describe('approveAgentBot - user creation', () => {
-    it('should create User with type=agent when approving', async () => {
-      const { requestId } = await agentBotService.createAgentBotWithAuthRequest({
-        parentId: parentUserId,
-        name: 'agent-agentbot',
-        purpose: 'Test agent',
-        reason: 'Testing',
-      });
-
-      const agentBot = await agentBotService.approveAgentBot(requestId);
-
-      const agentUser = await UserModel.findOne({ email: `agentbot_${agentBot._id}@aimp.local` });
-      expect(agentUser).toBeTruthy();
-      expect(agentUser?.type).toBe('agent');
-      expect(agentUser?.apiKey).toBe(agentBot.apiKey);
-    });
-  });
 });

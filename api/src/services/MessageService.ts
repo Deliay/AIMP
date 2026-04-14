@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 export interface SendMessageInput {
   topicId: string;
   senderId: string;
+  senderType: 'user' | 'agentbot';
   type: 'TEXT' | 'FORM';
   content: Record<string, unknown>;
 }
@@ -30,6 +31,7 @@ export class MessageService {
     const newMessage = {
       _id: new mongoose.Types.ObjectId(),
       senderId: new mongoose.Types.ObjectId(input.senderId),
+      senderType: input.senderType,
       type: input.type,
       content: input.content,
       readBy: [new mongoose.Types.ObjectId(input.senderId)],

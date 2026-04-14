@@ -98,10 +98,12 @@ type RejectAuthRequestPayload {
   status: AgentBotStatus!
 }
 
+union MessageSender = User | AgentBot
+
 type Message {
   id: ID!
   topicId: ID!
-  sender: User!
+  sender: MessageSender!
   type: MessageType!
   content: JSON!
   readBy: [ID!]!

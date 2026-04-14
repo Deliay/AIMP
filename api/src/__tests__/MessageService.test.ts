@@ -36,6 +36,7 @@ describe('MessageService', () => {
       const topic = await messageService.sendMessage({
         topicId,
         senderId,
+        senderType: 'user',
         type: 'TEXT',
         content: { text: 'Hello, world!' },
       });
@@ -57,6 +58,7 @@ describe('MessageService', () => {
       const topic = await messageService.sendMessage({
         topicId,
         senderId,
+        senderType: 'user',
         type: 'FORM',
         content: formContent,
       });
@@ -69,6 +71,7 @@ describe('MessageService', () => {
       const topic = await messageService.sendMessage({
         topicId,
         senderId,
+        senderType: 'user',
         type: 'TEXT',
         content: { text: 'Hello with uppercase!' },
       });
@@ -80,6 +83,7 @@ describe('MessageService', () => {
       const topic = await messageService.sendMessage({
         topicId,
         senderId,
+        senderType: 'user',
         type: 'TEXT',
         content: { text: 'Hello!' },
       });
@@ -93,6 +97,7 @@ describe('MessageService', () => {
         messageService.sendMessage({
           topicId: 'nonexistent-id',
           senderId,
+          senderType: 'user',
           type: 'TEXT',
           content: { text: 'Hello!' },
         })
@@ -109,6 +114,7 @@ describe('MessageService', () => {
         messageService.sendMessage({
           topicId,
           senderId: otherUserResult.userId,
+          senderType: 'user',
           type: 'TEXT',
           content: { text: 'Hello!' },
         })
@@ -121,6 +127,7 @@ describe('MessageService', () => {
       await messageService.sendMessage({
         topicId,
         senderId,
+        senderType: 'user',
         type: 'TEXT',
         content: { text: 'Hello!' },
       });
@@ -137,6 +144,7 @@ describe('MessageService', () => {
       await messageService.sendMessage({
         topicId,
         senderId,
+        senderType: 'user',
         type: 'TEXT',
         content: { text: 'Hello!' },
       });
@@ -157,6 +165,7 @@ describe('MessageService', () => {
       await messageService.sendMessage({
         topicId,
         senderId,
+        senderType: 'user',
         type: 'TEXT',
         content: { text: 'Hello!' },
       });
@@ -171,6 +180,7 @@ describe('MessageService', () => {
       await messageService.sendMessage({
         topicId,
         senderId,
+        senderType: 'user',
         type: 'TEXT',
         content: { text: 'Message 1' },
       });
@@ -178,6 +188,7 @@ describe('MessageService', () => {
       await messageService.sendMessage({
         topicId,
         senderId,
+        senderType: 'user',
         type: 'TEXT',
         content: { text: 'Message 2' },
       });
@@ -197,6 +208,7 @@ describe('MessageService', () => {
       await messageService.sendMessage({
         topicId,
         senderId,
+        senderType: 'user',
         type: 'TEXT',
         content: { text: 'Hello!' },
       });

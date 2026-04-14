@@ -1,19 +1,28 @@
-import { messageService } from '../services';
+import { messageService, authService, agentBotService } from '../services';
 import mongoose from 'mongoose';
+
+export interface ContextUser {
+  userId: string;
+  type: string;
+}
+
+export interface Context {
+  user?: ContextUser;
+}
 
 export const messageResolvers = {
   Query: {
     messages: async (
       _: unknown,
       { topicId }: { topicId: string },
-      context: { user?: { userId: string; type: string } }
+      context: Context
     ) => {
       if (!context.user) {
         throw new Error('Not authenticated');
       }
       const topic = await messageService.getMessagesByTopic(topicId, context.user.userId);
       if (!topic) return null;
-      return topic.messages.map((msg: any) => ({ _id: String(msg._id), senderId: String(msg.senderId), type: msg.type, content: msg.content, readBy: msg.readBy, createdAt: msg.createdAt, topicId: String(topic._id) }));
+      return topic.messages.map((msg: any) => ({ _id: String(msg._id), senderId: String(msg.senderId), senderType: msg.senderType, type: msg.type, content: msg.content, readBy: msg.readBy, createdAt: msg.createdAt, topicId: String(topic._id) }));
     },
   },
 
@@ -21,14 +30,16 @@ export const messageResolvers = {
     sendMessage: async (
       _: unknown,
       { topicId, type, content }: { topicId: string; type: 'TEXT' | 'FORM'; content: Record<string, unknown> },
-      context: { user?: { userId: string; type: string } }
+      context: Context
     ) => {
       if (!context.user) {
         throw new Error('Not authenticated');
       }
+      const senderType = context.user.type.toLowerCase() === 'agent' ? 'agentbot' : 'user';
       const topic = await messageService.sendMessage({
         topicId,
         senderId: context.user.userId,
+        senderType,
         type,
         content,
       });
@@ -40,6 +51,7 @@ export const messageResolvers = {
       return {
         _id: lastMessage._id,
         senderId: lastMessage.senderId,
+        senderType: lastMessage.senderType,
         type: lastMessage.type,
         content: lastMessage.content,
         readBy: lastMessage.readBy,
@@ -51,12 +63,22 @@ export const messageResolvers = {
     markAsRead: async (
       _: unknown,
       { topicId }: { topicId: string },
-      context: { user?: { userId: string; type: string } }
+      context: Context
     ) => {
       if (!context.user) {
         throw new Error('Not authenticated');
       }
-      return messageService.markAsRead(topicId, context.user.userId);
+      const result = await messageService.markAsRead(topicId, context.user.userId);
+      return result !== null;
+    },
+  },
+
+  Message: {
+    sender: async (message: { senderId: string; senderType: 'user' | 'agentbot' }) => {
+      if (message.senderType === 'agentbot') {
+        return agentBotService.getAgentBotById(message.senderId);
+      }
+      return authService.getUserById(message.senderId);
     },
   },
 };

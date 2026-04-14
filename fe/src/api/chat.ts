@@ -21,7 +21,7 @@ export const chatApi = {
   getTopics: async (): Promise<Topic[]> => {
     const response = await graphqlClient.post('', {
       json: {
-        query: `query { topics { id ownerId type name unreadCount createdAt updatedAt lastMessage { id topicId sender { id email type } type content readBy createdAt } members { id email type description createdAt updatedAt } } }`,
+        query: `query { topics { id ownerId type name unreadCount createdAt updatedAt lastMessage { id topicId sender { __typename ... on User { id email type } ... on AgentBot { id name } } type content readBy createdAt } members { id email type description createdAt updatedAt } } }`,
       },
     });
     const data: GraphQLResponse<TopicsResponse> = await response.json();
@@ -34,7 +34,7 @@ export const chatApi = {
   getTopic: async (id: string): Promise<Topic | null> => {
     const response = await graphqlClient.post('', {
       json: {
-        query: `query GetTopic($id: ID!) { topic(id: $id) { id ownerId type name unreadCount createdAt updatedAt lastMessage { id topicId sender { id email type } type content readBy createdAt } members { id email type description createdAt updatedAt } } }`,
+        query: `query GetTopic($id: ID!) { topic(id: $id) { id ownerId type name unreadCount createdAt updatedAt lastMessage { id topicId sender { __typename ... on User { id email type } ... on AgentBot { id name } } type content readBy createdAt } members { id email type description createdAt updatedAt } } }`,
         variables: { id },
       },
     });
@@ -48,7 +48,7 @@ export const chatApi = {
   getMessages: async (topicId: string, limit?: number, before?: string): Promise<Message[]> => {
     const response = await graphqlClient.post('', {
       json: {
-        query: `query GetMessages($topicId: ID!, $limit: Int, $before: DateTime) { messages(topicId: $topicId, limit: $limit, before: $before) { id topicId sender { id email type description createdAt updatedAt } type content readBy createdAt } }`,
+        query: `query GetMessages($topicId: ID!, $limit: Int, $before: DateTime) { messages(topicId: $topicId, limit: $limit, before: $before) { id topicId sender { __typename ... on User { id email type } ... on AgentBot { id name } } type content readBy createdAt } }`,
         variables: { topicId, limit, before },
       },
     });
@@ -62,7 +62,7 @@ export const chatApi = {
   sendMessage: async (topicId: string, type: MessageType, content: Record<string, unknown>): Promise<Message> => {
     const response = await graphqlClient.post('', {
       json: {
-        query: `mutation SendMessage($topicId: ID!, $type: MessageType!, $content: JSON!) { sendMessage(topicId: $topicId, type: $type, content: $content) { id topicId sender { id email type description createdAt updatedAt } type content readBy createdAt } }`,
+        query: `mutation SendMessage($topicId: ID!, $type: MessageType!, $content: JSON!) { sendMessage(topicId: $topicId, type: $type, content: $content) { id topicId sender { __typename ... on User { id email type } ... on AgentBot { id name } } type content readBy createdAt } }`,
         variables: { topicId, type, content },
       },
     });

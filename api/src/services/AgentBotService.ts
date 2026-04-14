@@ -1,4 +1,4 @@
-import { AgentBotModel, AgentBotDocument, AuthRequestModel, UserModel } from '../models';
+import { AgentBotModel, AgentBotDocument, AuthRequestModel } from '../models';
 import { generateApiKey } from '../utils';
 import mongoose from 'mongoose';
 
@@ -54,14 +54,6 @@ export class AgentBotService {
 
     authRequest.status = 'APPROVED';
     await authRequest.save();
-
-    await UserModel.create({
-      email: `agentbot_${agentBot._id}@aimp.local`,
-      passwordHash: '',
-      apiKey,
-      type: 'agent',
-      description: authRequest.agentBotPurpose,
-    });
 
     return agentBot;
   }
