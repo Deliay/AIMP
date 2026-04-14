@@ -20,8 +20,10 @@ export const makeWhoamiCommand = (program: Command) => {
   program
     .command('whoami')
     .description('显示当前登录用户信息')
-    .action(async () => {
-      const spinner = ora('正在获取用户信息...').start()
+    .action(async (_, cmd) => {
+      let root = cmd.parent;
+      while (root?.parent) root = root.parent;
+      const isJson = root?.opts()?.json;
 
       try {
         const client = getApiClient(resolve.serverUrl())
@@ -37,25 +39,49 @@ export const makeWhoamiCommand = (program: Command) => {
           }
         `)
 
-        spinner.stop()
-
         if (!response.me) {
-          console.log(chalk.yellow('未登录，请运行 aimp login'))
+          if (isJson) {
+            console.log(JSON.stringify({ loggedIn: false }))
+          } else {
+            const spinner = ora('正在获取用户信息...').start()
+            spinner.stop()
+            console.log(chalk.yellow('未登录，请运行 aimp login'))
+          }
           return
         }
 
-        console.log(chalk.bold('\n当前用户信息:\n'))
-        console.log(chalk.blue('用户ID:'), response.me.id)
-        console.log(chalk.blue('邮箱:'), response.me.email || 'N/A')
-        console.log(chalk.blue('类型:'), response.me.type)
-        if (response.me.description) {
-          console.log(chalk.blue('描述:'), response.me.description)
+        if (isJson) {
+          console.log(JSON.stringify({
+            loggedIn: true,
+            user: {
+              id: response.me.id,
+              email: response.me.email,
+              type: response.me.type,
+              description: response.me.description,
+              createdAt: response.me.createdAt
+            }
+          }))
+        } else {
+          const spinner = ora('正在获取用户信息...').start()
+          spinner.stop()
+          console.log(chalk.bold('\n当前用户信息:\n'))
+          console.log(chalk.blue('用户ID:'), response.me.id)
+          console.log(chalk.blue('邮箱:'), response.me.email || 'N/A')
+          console.log(chalk.blue('类型:'), response.me.type)
+          if (response.me.description) {
+            console.log(chalk.blue('描述:'), response.me.description)
+          }
+          console.log(chalk.blue('创建时间:'), new Date(response.me.createdAt).toLocaleString())
+          console.log()
         }
-        console.log(chalk.blue('创建时间:'), new Date(response.me.createdAt).toLocaleString())
-        console.log()
       } catch (error) {
-        spinner.fail(chalk.red('获取用户信息失败'))
-        handleApiError(error)
+        if (isJson) {
+          console.log(JSON.stringify({ error: error instanceof Error ? error.message : 'Failed to get user info' }))
+        } else {
+          const spinner = ora('正在获取用户信息...').start()
+          spinner.fail(chalk.red('获取用户信息失败'))
+          handleApiError(error)
+        }
         process.exit(1)
       }
     })

@@ -105,13 +105,16 @@ describe('CLI Integration Tests', () => {
   describe('CLI Login Command', () => {
     it('should login successfully with valid API key', async () => {
       const result = await runCli([
+        '--json',
         'login',
         '--api-key', testUser.apiKey,
         '--server-url', apiEndpoint
       ]);
 
       expect(result.code).toBe(0);
-      expect(result.stdout).toContain('登录成功');
+      const output = JSON.parse(result.stdout);
+      expect(output.success).toBe(true);
+      expect(output.userId).toBeTruthy();
     });
 
     it('should fail login with invalid API key', async () => {
@@ -137,15 +140,18 @@ describe('CLI Integration Tests', () => {
   describe('CLI Whoami Command', () => {
     it('should return user info when authenticated', async () => {
       await runCli([
+        '--json',
         'login',
         '--api-key', testUser.apiKey,
-        '--serer-url', apiEndpoint
+        '--server-url', apiEndpoint
       ]);
 
-      const result = await runCli(['whoami']);
+      const result = await runCli(['--json', 'whoami']);
 
       expect(result.code).toBe(0);
-      expect(result.stdout).toContain(testUser.userId);
+      const output = JSON.parse(result.stdout);
+      expect(output.loggedIn).toBe(true);
+      expect(output.user.id).toBe(testUser.userId);
     });
 
     it('should fail when not authenticated', async () => {
@@ -272,14 +278,17 @@ describe('CLI Integration Tests', () => {
   describe('CLI AgentBot Command', () => {
     it('should run agent-bot list command', async () => {
       await runCli([
+        '--json',
         'login',
         '--api-key', testUser.apiKey,
-        '--serer-url', apiEndpoint
+        '--server-url', apiEndpoint
       ]);
 
-      const result = await runCli(['agent-bot', 'list']);
+      const result = await runCli(['--json', 'agent-bot', 'list']);
 
       expect(result.code).toBe(0);
+      const output = JSON.parse(result.stdout);
+      expect(output.agentBots).toBeInstanceOf(Array);
     });
   });
 

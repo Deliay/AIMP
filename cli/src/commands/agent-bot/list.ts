@@ -21,7 +21,9 @@ export const makeAgentBotListCommand = (program: Command) => {
     .command('list')
     .description('列出当前帐号的 Agent Bot')
     .action(async (_, cmd) => {
-      const spinner = ora('正在获取 Agent Bot 列表...').start()
+      let root = cmd.parent;
+      while (root?.parent) root = root.parent;
+      const isJson = root?.opts()?.json;
 
       try {
         const serverUrl = cmd.parent?.opts()?.serverUrl;
@@ -38,37 +40,47 @@ export const makeAgentBotListCommand = (program: Command) => {
           }
         `)
 
-        spinner.stop()
+        if (isJson) {
+          console.log(JSON.stringify({ agentBots: response.agentBots }))
+        } else {
+          const spinner = ora('正在获取 Agent Bot 列表...').start()
+          spinner.stop()
 
-        if (response.agentBots.length === 0) {
-          console.log(chalk.yellow('暂无 Agent Bot'))
-          return
+          if (response.agentBots.length === 0) {
+            console.log(chalk.yellow('暂无 Agent Bot'))
+            return
+          }
+
+          console.log(chalk.bold('\nAgent Bot 列表:\n'))
+
+          const separator = '─'.repeat(50)
+
+          console.log(separator)
+          console.log(chalk.cyan('名称'.padEnd(23)) + chalk.cyan('状态'.padEnd(8)) + chalk.cyan('创建时间'))
+          console.log(separator)
+
+          for (const bot of response.agentBots) {
+            const statusColor = bot.status === 'APPROVED' ? chalk.green :
+              bot.status === 'PENDING' ? chalk.yellow : chalk.red
+            const createdAt = new Date(bot.createdAt).toISOString().split('T')[0]
+
+            console.log(
+              bot.name.padEnd(23) + '│ ' +
+              statusColor(bot.status.padEnd(6)) + ' │ ' +
+              createdAt
+            )
+          }
+
+          console.log(separator + '\n')
         }
-
-        console.log(chalk.bold('\nAgent Bot 列表:\n'))
-
-        const separator = '─'.repeat(50)
-
-        console.log(separator)
-        console.log(chalk.cyan('名称'.padEnd(23)) + chalk.cyan('状态'.padEnd(8)) + chalk.cyan('创建时间'))
-        console.log(separator)
-
-        for (const bot of response.agentBots) {
-          const statusColor = bot.status === 'APPROVED' ? chalk.green :
-            bot.status === 'PENDING' ? chalk.yellow : chalk.red
-          const createdAt = new Date(bot.createdAt).toISOString().split('T')[0]
-
-          console.log(
-            bot.name.padEnd(23) + '│ ' +
-            statusColor(bot.status.padEnd(6)) + ' │ ' +
-            createdAt
-          )
-        }
-
-        console.log(separator + '\n')
       } catch (error) {
-        spinner.fail(chalk.red('获取 Agent Bot 列表失败'))
-        handleApiError(error)
+        if (isJson) {
+          console.log(JSON.stringify({ error: error instanceof Error ? error.message : 'Failed to get agent bots' }))
+        } else {
+          const spinner = ora('正在获取 Agent Bot 列表...').start()
+          spinner.fail(chalk.red('获取 Agent Bot 列表失败'))
+          handleApiError(error)
+        }
         process.exit(1)
       }
     })
