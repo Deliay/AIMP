@@ -18,6 +18,12 @@ enum TopicType {
   AUTH
 }
 
+enum TopicStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+}
+
 enum MessageType {
   TEXT
   FORM
@@ -102,8 +108,11 @@ type Message {
 type Topic {
   id: ID!
   ownerId: ID!
+  slug: String!
   type: TopicType!
-  name: String
+  name: String!
+  description: String!
+  status: TopicStatus!
   members: [User!]!
   lastMessage: Message
   unreadCount: Int!
@@ -122,6 +131,24 @@ type FormContent {
   title: String!
   fields: [FormField!]!
   submitLabel: String
+}
+
+type CreateTopicPayload {
+  requestId: ID
+  status: TopicStatus!
+  topic: Topic
+}
+
+type TopicSearchResult {
+  slug: String!
+  name: String!
+  description: String!
+  relateScore: Float!
+}
+
+type ClearTopicMessagesPayload {
+  status: String!
+  clearedCount: Int!
 }
 
 input FormFieldInput {
@@ -143,14 +170,20 @@ type Query {
   authRequests(status: SubaccountStatus): [AuthRequest!]!
   topics: [Topic!]!
   topic(id: ID!): Topic
+  topicBySlug(slug: String!): Topic
   messages(topicId: ID!, limit: Int, before: DateTime): [Message!]!
+  searchTopics(keyword: String!): [TopicSearchResult!]!
 }
 
 type Mutation {
   createSubaccount(name: String!, purpose: String!, reason: String!): CreateSubaccountPayload!
   approveSubaccount(requestId: ID!): ApproveAuthRequestPayload!
   rejectSubaccount(requestId: ID!, reason: String!): RejectAuthRequestPayload!
+  createTopic(slug: String!, name: String!, description: String!, wait: Boolean): CreateTopicPayload!
+  approveTopic(requestId: ID!): Topic!
+  rejectTopic(requestId: ID!, reason: String!): Boolean!
   sendMessage(topicId: ID!, type: MessageType!, content: JSON!): Message!
   markAsRead(topicId: ID!): Boolean!
+  clearTopicMessages(topicId: ID!): ClearTopicMessagesPayload!
   regenerateApiKey: ApiKeyPayload!
 }
