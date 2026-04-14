@@ -1,4 +1,3 @@
-import axios, { AxiosInstance, AxiosError } from 'axios'
 import chalk from 'chalk'
 import { config, resolve } from './config'
 
@@ -12,78 +11,112 @@ export class ApiError extends Error {
   }
 }
 
+export interface GraphQLResponse<T> {
+  data?: T
+  errors?: Array<{ message: string }>
+}
+
 export class ApiClient {
-  private client: AxiosInstance
+  private baseURL: string
+  private token?: string
 
   constructor(baseURL?: string, token?: string) {
-    const url = baseURL || resolve.serverUrl()
-    const authToken = token || resolve.token()
+    this.baseURL = baseURL || resolve.serverUrl()
+    this.token = token || resolve.token()
+  }
 
-    this.client = axios.create({
-      baseURL: url,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(authToken && { Authorization: `Bearer ${authToken}` })
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    }
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`
+    }
+    return headers
+  }
+
+  private async handleResponse<T>(response: Response): Promise<T> {
+    if (!response.ok) {
+      let message = 'Unknown error'
+
+      switch (response.status) {
+        case 401:
+          message = '认证失败，请重新登录'
+          break
+        case 403:
+          message = '权限不足'
+          break
+        case 404:
+          message = '资源不存在'
+          break
+        case 422:
+          message = '参数校验失败'
+          break
+        case 500:
+          message = '服务器错误'
+          break
+        default:
+          message = response.statusText || 'Unknown error'
       }
-    })
 
-    this.client.interceptors.response.use(
-      response => response,
-      (error: AxiosError) => {
-        if (error.response) {
-          const status = error.response.status
-          let message = 'Unknown error'
+      throw new ApiError(response.status, message)
+    }
 
-          switch (status) {
-            case 401:
-              message = '认证失败，请重新登录'
-              break
-            case 403:
-              message = '权限不足'
-              break
-            case 404:
-              message = '资源不存在'
-              break
-            case 422:
-              message = '参数校验失败'
-              break
-            case 500:
-              message = '服务器错误'
-              break
-            default:
-              message = error.response.statusText || 'Unknown error'
-          }
-
-          throw new ApiError(status, message)
-        }
-
-        if (error.request) {
-          throw new ApiError(0, '无法连接到服务器，请检查网络连接')
-        }
-
-        throw error
-      }
-    )
+    return response.json() as Promise<T>
   }
 
   async get<T>(path: string): Promise<T> {
-    const response = await this.client.get<T>(path)
-    return response.data
+    const response = await fetch(`${this.baseURL}${path}`, {
+      method: 'GET',
+      headers: this.getHeaders()
+    })
+    return this.handleResponse<T>(response)
   }
 
   async post<T>(path: string, data?: unknown): Promise<T> {
-    const response = await this.client.post<T>(path, data)
-    return response.data
+    const response = await fetch(`${this.baseURL}${path}`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: data ? JSON.stringify(data) : undefined
+    })
+    return this.handleResponse<T>(response)
   }
 
   async put<T>(path: string, data?: unknown): Promise<T> {
-    const response = await this.client.put<T>(path, data)
-    return response.data
+    const response = await fetch(`${this.baseURL}${path}`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: data ? JSON.stringify(data) : undefined
+    })
+    return this.handleResponse<T>(response)
   }
 
   async delete<T>(path: string): Promise<T> {
-    const response = await this.client.delete<T>(path)
-    return response.data
+    const response = await fetch(`${this.baseURL}${path}`, {
+      method: 'DELETE',
+      headers: this.getHeaders()
+    })
+    return this.handleResponse<T>(response)
+  }
+
+  async graphql<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
+    const response = await fetch(`${this.baseURL}/graphql`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ query, variables })
+    })
+
+    const result = await response.json() as GraphQLResponse<T>
+
+    if (result.errors && result.errors.length > 0) {
+      throw new Error(result.errors[0].message)
+    }
+
+    if (!result.data) {
+      throw new Error('No data returned from GraphQL')
+    }
+
+    return result.data
   }
 }
 

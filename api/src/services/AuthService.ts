@@ -18,7 +18,7 @@ function isValidObjectId(id: string): boolean {
 }
 
 export class AuthService {
-  async register(input: RegisterInput): Promise<{ token: string; userId: string }> {
+  async register(input: RegisterInput): Promise<{ token: string; userId: string; apiKey: string }> {
     const existingUser = await UserModel.findOne({ email: input.email });
     if (existingUser) {
       throw new Error('Email already registered');
@@ -36,7 +36,7 @@ export class AuthService {
 
     const token = generateJwt({ userId: user._id.toString(), type: user.type });
 
-    return { token, userId: user._id.toString() };
+    return { token, userId: user._id.toString(), apiKey };
   }
 
   async login(input: LoginInput): Promise<{ token: string; userId: string }> {

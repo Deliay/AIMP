@@ -14,14 +14,14 @@ export interface FormMessage {
   type: 'form'
   title: string
   fields: FormField[]
-  submit_label: string
+  submitLabel: string
 }
 
 export type Message = TextMessage | FormMessage
 
 export interface LoginResponse {
   token: string
-  user_id: string
+  userId: string
 }
 
 export interface Subaccount {
@@ -29,17 +29,17 @@ export interface Subaccount {
   name: string
   purpose: string
   status: 'pending' | 'approved' | 'rejected'
-  created_at: string
+  createdAt: string
 }
 
 export interface CreateSubaccountResponse {
-  request_id: string
+  requestId: string
   status: 'pending'
 }
 
 export interface SendMessageResponse {
-  message_id: string
-  created_at: string
+  messageId: string
+  createdAt: string
 }
 
 export interface FormSubmitResponse {
@@ -57,10 +57,10 @@ export interface ChatMessage {
 
 export interface Config {
   token?: string
-  user_id?: string
-  api_key?: string
-  server_url: string
-  active_subaccount_id?: string
+  userId?: string
+  apiKey?: string
+  serverUrl: string
+  activeSubaccountId?: string
 }
 
 export interface GlobalOptions {

@@ -14,6 +14,10 @@ test/
 ├── api/                     # API 契约测试
 │   └── *.test.ts            # GraphQL/REST API 测试
 │
+├── cli/                      # CLI 集成测试
+│   ├── helpers/             # 测试辅助函数（Aspire、API）
+│   └── *.test.js            # CLI 命令测试
+│
 ├── .agents/
 │   └── skills/
 │       └── playwright-cli/  # Playwright Skill（用于 E2E 测试）
@@ -163,9 +167,82 @@ aspire stop
 
 ---
 
-## 3. 测试数据管理
+## 3. CLI 集成测试 (`test/cli/`)
 
-### 3.1 测试帐号
+### 3.1 测试结构
+
+```
+test/cli/
+├── helpers/
+│   └── setup.js        # Jest setup（获取 API endpoint、注册测试用户）
+├── cli.test.js         # CLI 命令集成测试
+├── jest.config.js      # Jest 配置
+└── package.json        # 测试依赖
+```
+
+### 3.2 测试执行
+
+**前置条件**：必须先启动 Aspire 服务。
+
+```bash
+# 1. 启动 Aspire
+cd ../infra/aspire-local-dev
+aspire start
+
+# 2. 获取 API endpoint
+aspire describe api
+
+# 3. 安装依赖
+cd ../test/cli && npm install
+
+# 4. 运行测试
+npm test
+
+# 5. 停止 Aspire
+cd ../infra/aspire-local-dev && aspire stop
+```
+
+### 3.3 测试范围
+
+CLI 集成测试覆盖以下场景：
+
+| 测试场景 | 说明 | API 方式 |
+|---------|------|----------|
+| 用户注册 | 通过 `/api/auth/register` 注册新用户 | REST |
+| API Key 登录 | 通过 `/api/auth/cli-login` 登录 | REST |
+| CLI 登录 | 测试 `aimp login` 命令 | REST |
+| CLI 登出 | 测试 `aimp logout` 命令 | Local |
+| CLI whoami | 测试 `aimp whoami` 命令 | GraphQL |
+| 子帐号列表 | 测试 `aimp subaccount list` 命令 | GraphQL |
+| GraphQL 查询 | 测试 me, subaccounts, topics 查询 | GraphQL |
+| GraphQL 变更 | 测试 createSubaccount 变更 | GraphQL |
+
+### 3.4 CLI 与 API 契约
+
+CLI 严格遵循 [[../contract/aimp.schema]] 和 [[../contract/aimp.auth.yaml]] 定义的契约：
+
+**REST API（仅限认证）**：
+- `POST /api/auth/register` - 用户注册
+- `POST /api/auth/cli-login` - CLI 登录
+- `POST /api/auth/session` - Session 刷新
+- `DELETE /api/auth/session` - 登出
+- `GET /api/auth/me` - 获取当前用户
+
+**GraphQL（数据操作）**：
+- `Query.me` - 获取当前用户
+- `Query.subaccounts` - 获取子帐号列表
+- `Query.topics` - 获取话题列表
+- `Query.messages` - 获取消息列表
+- `Mutation.createSubaccount` - 创建子帐号
+- `Mutation.sendMessage` - 发送消息
+- `Mutation.markAsRead` - 标记已读
+- `Mutation.regenerateApiKey` - 重新生成 API Key
+
+---
+
+## 4. 测试数据管理
+
+### 4.1 测试帐号
 
 测试前创建专用测试帐号：
 
@@ -174,7 +251,7 @@ aspire stop
 测试 Agent: test-agent@aimp.test (通过 subaccount 流程创建)
 ```
 
-### 3.2 测试数据清理
+### 4.2 测试数据清理
 
 - 测试后清理所有创建的消息、Topic
 - 子帐号申请状态需重置

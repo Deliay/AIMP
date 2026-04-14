@@ -1,9 +1,25 @@
 import { Command } from 'commander'
 import chalk from 'chalk'
 import ora from 'ora'
-import { getApiClient, handleApiError, ApiError } from '../../core/api-client'
+import { getApiClient, handleApiError } from '../../core/api-client'
 import { resolve } from '../../core/config'
-import { CreateSubaccountResponse } from '../../types'
+
+interface CreateSubaccountResponse {
+  createSubaccount: {
+    requestId: string
+    status: string
+  }
+}
+
+interface SubaccountStatusResponse {
+  authRequests: Array<{
+    id: string
+    status: string
+    subaccount?: {
+      apiKey?: string
+    }
+  }>
+}
 
 export const makeSubaccountCreateCommand = (program: Command) => {
   program
@@ -19,7 +35,14 @@ export const makeSubaccountCreateCommand = (program: Command) => {
       try {
         const client = getApiClient(resolve.serverUrl())
 
-        const response = await client.post<CreateSubaccountResponse>('/api/subaccounts', {
+        const response = await client.graphql<CreateSubaccountResponse>(`
+          mutation CreateSubaccount($name: String!, $purpose: String!, $reason: String!) {
+            createSubaccount(name: $name, purpose: $purpose, reason: $reason) {
+              requestId
+              status
+            }
+          }
+        `, {
           name: options.name,
           purpose: options.purpose,
           reason: options.reason
@@ -27,12 +50,12 @@ export const makeSubaccountCreateCommand = (program: Command) => {
 
         if (options.wait) {
           spinner.text = '申请已提交，等待审批...'
-          await pollForApproval(client, response.request_id)
+          await pollForApproval(client, response.createSubaccount.requestId)
           spinner.succeed(chalk.green('✓ 审批通过'))
-          console.log(chalk.blue('子帐号 API Key:'), response.request_id)
+          console.log(chalk.blue('申请ID:'), response.createSubaccount.requestId)
         } else {
           spinner.succeed(chalk.green('✓ 申请已提交'))
-          console.log(chalk.blue('申请ID:'), response.request_id)
+          console.log(chalk.blue('申请ID:'), response.createSubaccount.requestId)
           console.log(chalk.yellow('请在 Web Console 查看审批状态'))
         }
       } catch (error) {
@@ -50,15 +73,27 @@ async function pollForApproval(
   intervalMs = 5000
 ): Promise<void> {
   for (let i = 0; i < maxAttempts; i++) {
-    const response = await client.get<{ status: string; api_key?: string }>(
-      `/api/subaccounts/${requestId}`
-    )
+    const response = await client.graphql<SubaccountStatusResponse>(`
+      query GetAuthRequest($status: SubaccountStatus) {
+        authRequests(status: $status) {
+          id
+          status
+          subaccount {
+            apiKey
+          }
+        }
+      }
+    `, { status: 'PENDING' })
 
-    if (response.status === 'approved') {
+    const request = response.authRequests.find(r => r.id === requestId)
+    if (request && request.status === 'APPROVED') {
+      if (request.subaccount?.apiKey) {
+        console.log(chalk.blue('子帐号 API Key:'), request.subaccount.apiKey)
+      }
       return
     }
 
-    if (response.status === 'rejected') {
+    if (request && request.status === 'REJECTED') {
       throw new Error('申请被拒绝')
     }
 

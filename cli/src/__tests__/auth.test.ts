@@ -1,18 +1,5 @@
 const mockPost = jest.fn()
 
-jest.mock('axios', () => ({
-  create: jest.fn(() => ({
-    get: jest.fn(),
-    post: mockPost,
-    put: jest.fn(),
-    delete: jest.fn(),
-    interceptors: {
-      request: { use: jest.fn() },
-      response: { use: jest.fn() }
-    }
-  }))
-}))
-
 jest.mock('conf', () => {
   const store = new Map<string, unknown>()
   return jest.fn().mockImplementation(() => ({
@@ -48,7 +35,7 @@ describe('auth', () => {
     it('should login successfully and store credentials', async () => {
       const mockResponse = {
         token: 'jwt-token-123',
-        user_id: 'user-456'
+        userId: 'user-456'
       }
       mockPost.mockResolvedValue(mockResponse)
 
@@ -56,8 +43,8 @@ describe('auth', () => {
 
       expect(result).toEqual(mockResponse)
       expect(config.get('token')).toBe('jwt-token-123')
-      expect(config.get('user_id')).toBe('user-456')
-      expect(config.get('api_key')).toBe('ak_test_key')
+      expect(config.get('userId')).toBe('user-456')
+      expect(config.get('apiKey')).toBe('ak_test_key')
     })
 
     it('should throw ApiError on authentication failure', async () => {
@@ -72,14 +59,14 @@ describe('auth', () => {
   describe('logout', () => {
     it('should clear all stored credentials', () => {
       config.set('token', 'some-token')
-      config.set('user_id', 'some-user')
-      config.set('api_key', 'some-key')
+      config.set('userId', 'some-user')
+      config.set('apiKey', 'some-key')
 
       auth.logout()
 
       expect(config.get('token')).toBeUndefined()
-      expect(config.get('user_id')).toBeUndefined()
-      expect(config.get('api_key')).toBeUndefined()
+      expect(config.get('userId')).toBeUndefined()
+      expect(config.get('apiKey')).toBeUndefined()
     })
   })
 
@@ -111,12 +98,12 @@ describe('auth', () => {
   })
 
   describe('getUserId', () => {
-    it('should return undefined when no user_id', () => {
+    it('should return undefined when no userId', () => {
       expect(auth.getUserId()).toBeUndefined()
     })
 
-    it('should return user_id when set', () => {
-      config.set('user_id', 'user-123')
+    it('should return userId when set', () => {
+      config.set('userId', 'user-123')
       expect(auth.getUserId()).toBe('user-123')
     })
   })

@@ -3,6 +3,7 @@
 import { Command } from 'commander'
 import { makeLoginCommand } from './commands/login'
 import { makeLogoutCommand } from './commands/logout'
+import { makeWhoamiCommand } from './commands/whoami'
 import { makeSubaccountCommands } from './commands/subaccount'
 import { makeChatCommands } from './commands/chat'
 
@@ -20,6 +21,7 @@ program
 
 makeLoginCommand(program)
 makeLogoutCommand(program)
+makeWhoamiCommand(program)
 makeSubaccountCommands(program)
 makeChatCommands(program)
 

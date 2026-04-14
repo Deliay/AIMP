@@ -1,9 +1,9 @@
 import Conf from 'conf'
 
-const store: Conf = new Conf({
+const store = new Conf({
   projectName: 'aimp',
   defaults: {
-    server_url: 'https://api.aimp.dev'
+    serverUrl: 'https://api.aimp.dev'
   }
 })
 
@@ -31,7 +31,7 @@ export const config = {
 
 export const resolve = {
   serverUrl: (serverOption?: string): string => {
-    return serverOption || (config.get('server_url') as string) || 'https://api.aimp.dev'
+    return serverOption || (config.get('serverUrl') as string) || 'https://api.aimp.dev'
   },
 
   token: (): string | undefined => {

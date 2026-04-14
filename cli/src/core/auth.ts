@@ -3,7 +3,7 @@ import { getApiClient, ApiError } from './api-client'
 import { LoginResponse } from '../types'
 
 export const auth = {
-  async login(apiKey: string, serverUrl?: string): Promise<LoginResponse> {
+    async login(apiKey: string, serverUrl?: string): Promise<LoginResponse> {
     const client = getApiClient(serverUrl)
 
     try {
@@ -12,8 +12,11 @@ export const auth = {
       })
 
       config.set('token', response.token)
-      config.set('user_id', response.user_id)
-      config.set('api_key', apiKey)
+      config.set('userId', response.userId)
+      config.set('apiKey', apiKey)
+      if (serverUrl) {
+        config.set('serverUrl', serverUrl)
+      }
 
       return response
     } catch (error) {
@@ -37,6 +40,6 @@ export const auth = {
   },
 
   getUserId(): string | undefined {
-    return config.get('user_id') as string | undefined
+    return config.get('userId') as string | undefined
   }
 }

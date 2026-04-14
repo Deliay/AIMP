@@ -1,18 +1,38 @@
 import { Command } from 'commander'
 import chalk from 'chalk'
 import ora from 'ora'
-import { getApiClient, handleApiError, ApiError } from '../../core/api-client'
+import { getApiClient, handleApiError } from '../../core/api-client'
 import { resolve } from '../../core/config'
-import { SendMessageResponse, Message } from '../../types'
+
+interface SendMessageResponse {
+  sendMessage: {
+    id: string
+    topicId: string
+    type: string
+    content: unknown
+    createdAt: string
+  }
+}
+
+interface MessageResponse {
+  messages: Array<{
+    id: string
+    topicId: string
+    type: string
+    content: unknown
+    readBy: string[]
+    createdAt: string
+  }>
+}
 
 export const makeChatSendCommand = (program: Command) => {
   program
     .command('send')
     .description('发送消息')
     .requiredOption('--to <TARGET_ID>', '目标用户/Agent ID')
-    .requiredOption('--type <TYPE>', '消息类型: text 或 form')
+    .requiredOption('--type <TYPE>', '消息类型: TEXT 或 FORM')
     .requiredOption('--content <CONTENT>', '消息内容（JSON 格式字符串）')
-    .option('--wait', '等待表单响应后继续（仅 type=form 时有效）')
+    .option('--wait', '等待表单响应后继续（仅 type=FORM 时有效）')
     .action(async (options) => {
       const spinner = ora('正在发送消息...').start()
 
@@ -27,18 +47,28 @@ export const makeChatSendCommand = (program: Command) => {
           process.exit(1)
         }
 
-        const response = await client.post<SendMessageResponse>('/api/chat/send', {
-          to: options.to,
-          type: options.type,
-          content: content
+        const response = await client.graphql<SendMessageResponse>(`
+          mutation SendMessage($topicId: ID!, $type: MessageType!, $content: JSON!) {
+            sendMessage(topicId: $topicId, type: $type, content: $content) {
+              id
+              topicId
+              type
+              content
+              createdAt
+            }
+          }
+        `, {
+          topicId: options.to,
+          type: options.type.toUpperCase(),
+          content
         })
 
         spinner.succeed(chalk.green('✓ 消息已发送'))
-        console.log(chalk.blue('消息ID:'), response.message_id)
+        console.log(chalk.blue('消息ID:'), response.sendMessage.id)
 
-        if (options.wait && options.type === 'form') {
+        if (options.wait && options.type.toUpperCase() === 'FORM') {
           spinner.text = '等待表单响应...'
-          const formResult = await pollForFormResponse(client, response.message_id)
+          const formResult = await pollForFormResponse(client, response.sendMessage.id)
           spinner.succeed(chalk.green('✓ 收到表单响应'))
           console.log(JSON.stringify(formResult, null, 2))
         }
@@ -57,20 +87,20 @@ async function pollForFormResponse(
   intervalMs = 5000
 ): Promise<unknown> {
   for (let i = 0; i < maxAttempts; i++) {
-    try {
-      const response = await client.get<{ status: string; result?: unknown }>(
-        `/api/chat/messages/${messageId}`
-      )
+    const response = await client.graphql<MessageResponse>(`
+      query GetMessage($topicId: ID!) {
+        messages(topicId: $topicId, limit: 10) {
+          id
+          type
+          content
+          readBy
+        }
+      }
+    `, { topicId: messageId })
 
-      if (response.status === 'responded' && response.result) {
-        return response.result
-      }
-    } catch (error) {
-      if (error instanceof ApiError && error.statusCode === 404) {
-        await new Promise(resolve => setTimeout(resolve, intervalMs))
-        continue
-      }
-      throw error
+    const message = response.messages.find(m => m.id === messageId)
+    if (message && message.readBy.length > 1) {
+      return message.content
     }
 
     await new Promise(resolve => setTimeout(resolve, intervalMs))

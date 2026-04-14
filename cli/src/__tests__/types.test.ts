@@ -35,12 +35,12 @@ describe('types', () => {
         type: 'form',
         title: 'Configuration',
         fields,
-        submit_label: 'Submit'
+        submitLabel: 'Submit'
       }
       expect(msg.type).toBe('form')
       expect(msg.title).toBe('Configuration')
       expect(msg.fields).toHaveLength(2)
-      expect(msg.submit_label).toBe('Submit')
+      expect(msg.submitLabel).toBe('Submit')
     })
 
     it('should support multiselect field type', () => {
@@ -69,7 +69,7 @@ describe('types', () => {
         type: 'form',
         title: 'Test',
         fields: [],
-        submit_label: 'Submit'
+        submitLabel: 'Submit'
       }
       expect(msg.type).toBe('form')
     })
@@ -79,10 +79,10 @@ describe('types', () => {
     it('should have correct structure', () => {
       const response: LoginResponse = {
         token: 'jwt-token',
-        user_id: 'user-123'
+        userId: 'user-123'
       }
       expect(response.token).toBe('jwt-token')
-      expect(response.user_id).toBe('user-123')
+      expect(response.userId).toBe('user-123')
     })
   })
 
@@ -93,7 +93,7 @@ describe('types', () => {
         name: 'test',
         purpose: 'testing',
         status: 'pending',
-        created_at: '2024-01-01T00:00:00Z'
+        createdAt: '2024-01-01T00:00:00Z'
       }
       expect(pending.status).toBe('pending')
 
@@ -108,10 +108,10 @@ describe('types', () => {
   describe('CreateSubaccountResponse', () => {
     it('should have correct structure', () => {
       const response: CreateSubaccountResponse = {
-        request_id: 'req-123',
+        requestId: 'req-123',
         status: 'pending'
       }
-      expect(response.request_id).toBe('req-123')
+      expect(response.requestId).toBe('req-123')
       expect(response.status).toBe('pending')
     })
   })
@@ -119,11 +119,11 @@ describe('types', () => {
   describe('SendMessageResponse', () => {
     it('should have correct structure', () => {
       const response: SendMessageResponse = {
-        message_id: 'msg-456',
-        created_at: '2024-01-01T12:00:00Z'
+        messageId: 'msg-456',
+        createdAt: '2024-01-01T12:00:00Z'
       }
-      expect(response.message_id).toBe('msg-456')
-      expect(response.created_at).toBe('2024-01-01T12:00:00Z')
+      expect(response.messageId).toBe('msg-456')
+      expect(response.createdAt).toBe('2024-01-01T12:00:00Z')
     })
   })
 
@@ -162,19 +162,19 @@ describe('types', () => {
     it('should have correct structure', () => {
       const cfg: Config = {
         token: 'token',
-        user_id: 'user',
-        api_key: 'ak_xxx',
-        server_url: 'https://api.aimp.dev',
-        active_subaccount_id: 'sub-1'
+        userId: 'user',
+        apiKey: 'ak_xxx',
+        serverUrl: 'https://api.aimp.dev',
+        activeSubaccountId: 'sub-1'
       }
-      expect(cfg.server_url).toBe('https://api.aimp.dev')
+      expect(cfg.serverUrl).toBe('https://api.aimp.dev')
     })
 
     it('should allow partial configuration', () => {
       const cfg: Config = {
-        server_url: 'https://api.aimp.dev'
+        serverUrl: 'https://api.aimp.dev'
       }
-      expect(cfg.server_url).toBe('https://api.aimp.dev')
+      expect(cfg.serverUrl).toBe('https://api.aimp.dev')
     })
   })
 

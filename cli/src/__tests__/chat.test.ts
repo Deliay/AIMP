@@ -4,19 +4,6 @@ const mockPost = jest.fn()
 const mockGet = jest.fn()
 const processExitMock = jest.spyOn(process, 'exit').mockImplementation((() => {}) as () => never)
 
-jest.mock('axios', () => ({
-  create: jest.fn(() => ({
-    get: mockGet,
-    post: mockPost,
-    put: jest.fn(),
-    delete: jest.fn(),
-    interceptors: {
-      request: { use: jest.fn() },
-      response: { use: jest.fn() }
-    }
-  }))
-}))
-
 jest.mock('conf', () => {
   const store = new Map<string, unknown>()
   return jest.fn().mockImplementation(() => ({

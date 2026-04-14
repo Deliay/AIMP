@@ -85,13 +85,13 @@ describe('resolve', () => {
       expect(resolve.serverUrl('https://custom.server.com')).toBe('https://custom.server.com')
     })
 
-    it('should return config server_url when set', () => {
-      config.set('server_url', 'https://config.server.com')
+    it('should return config serverUrl when set', () => {
+      config.set('serverUrl', 'https://config.server.com')
       expect(resolve.serverUrl()).toBe('https://config.server.com')
     })
 
     it('should prefer option over config', () => {
-      config.set('server_url', 'https://config.server.com')
+      config.set('serverUrl', 'https://config.server.com')
       expect(resolve.serverUrl('https://option.server.com')).toBe('https://option.server.com')
     })
   })
