@@ -1,6 +1,6 @@
 import { resolvers } from '../resolvers';
 import { authService } from '../services/AuthService';
-import { subaccountService } from '../services/SubaccountService';
+import { agentBotService } from '../services/AgentBotService';
 import { topicService } from '../services/TopicService';
 import { messageService } from '../services/MessageService';
 
@@ -114,7 +114,7 @@ describe('Resolvers', () => {
     });
   });
 
-  describe('Subaccount Resolvers', () => {
+  describe('AgentBot Resolvers', () => {
     let humanUserId: string;
     let humanContext: { user?: { userId: string; type: string } };
 
@@ -127,30 +127,30 @@ describe('Resolvers', () => {
       humanContext = { user: { userId, type: 'human' } };
     });
 
-    describe('Query.subaccounts', () => {
-      it('should return subaccounts for parent', async () => {
-        const { requestId } = await subaccountService.createSubaccountWithAuthRequest({
+    describe('Query.agentBots', () => {
+      it('should return agent bots for parent', async () => {
+        const { requestId } = await agentBotService.createAgentBotWithAuthRequest({
           parentId: humanUserId,
           name: 'test-subaccount',
           purpose: 'Testing',
           reason: 'Test',
         });
-        await subaccountService.approveSubaccount(requestId);
+        await agentBotService.approveAgentBot(requestId);
 
-        const result = await (resolvers.Query as any).subaccounts(null, null, humanContext);
+        const result = await (resolvers.Query as any).agentBots(null, null, humanContext);
         expect(result).toHaveLength(1);
       });
 
       it('should throw error when not authenticated', async () => {
         await expect(
-          (resolvers.Query as any).subaccounts(null, null, {})
+          (resolvers.Query as any).agentBots(null, null, {})
         ).rejects.toThrow('Not authenticated');
       });
     });
 
-    describe('Mutation.createSubaccount', () => {
-      it('should create subaccount with auth topic', async () => {
-        const result = await (resolvers.Mutation as any).createSubaccount(
+    describe('Mutation.createAgentBot', () => {
+      it('should create agent bot with auth topic', async () => {
+        const result = await (resolvers.Mutation as any).createAgentBot(
           null,
           { name: 'new-subaccount', purpose: 'Testing', reason: 'Test reason' },
           humanContext
@@ -165,7 +165,7 @@ describe('Resolvers', () => {
 
       it('should throw error when not authenticated', async () => {
         await expect(
-          (resolvers.Mutation as any).createSubaccount(
+          (resolvers.Mutation as any).createAgentBot(
             null,
             { name: 'new-subaccount', purpose: 'Testing', reason: 'Test reason' },
             {}
@@ -174,16 +174,16 @@ describe('Resolvers', () => {
       });
     });
 
-    describe('Mutation.approveSubaccount', () => {
-      it('should approve subaccount when user is human', async () => {
-        const { requestId } = await subaccountService.createSubaccountWithAuthRequest({
+    describe('Mutation.approveAgentBot', () => {
+      it('should approve agent bot when user is human', async () => {
+        const { requestId } = await agentBotService.createAgentBotWithAuthRequest({
           parentId: humanUserId,
           name: 'test-subaccount',
           purpose: 'Testing',
           reason: 'Test',
         });
 
-        const result = await (resolvers.Mutation as any).approveSubaccount(
+        const result = await (resolvers.Mutation as any).approveAgentBot(
           null,
           { requestId },
           humanContext
@@ -197,25 +197,25 @@ describe('Resolvers', () => {
         const agentContext = { user: { userId: humanUserId, type: 'agent' } };
 
         await expect(
-          (resolvers.Mutation as any).approveSubaccount(
+          (resolvers.Mutation as any).approveAgentBot(
             null,
             { requestId: 'some-id' },
             agentContext
           )
-        ).rejects.toThrow('Only human users can approve subaccounts');
+        ).rejects.toThrow('Only human users can approve agent bots');
       });
     });
 
-    describe('Mutation.rejectSubaccount', () => {
-      it('should reject subaccount when user is human', async () => {
-        const { requestId } = await subaccountService.createSubaccountWithAuthRequest({
+    describe('Mutation.rejectAgentBot', () => {
+      it('should reject agent bot when user is human', async () => {
+        const { requestId } = await agentBotService.createAgentBotWithAuthRequest({
           parentId: humanUserId,
           name: 'test-subaccount',
           purpose: 'Testing',
           reason: 'Test',
         });
 
-        const result = await (resolvers.Mutation as any).rejectSubaccount(
+        const result = await (resolvers.Mutation as any).rejectAgentBot(
           null,
           { requestId, reason: 'Not justified' },
           humanContext
@@ -228,12 +228,12 @@ describe('Resolvers', () => {
         const agentContext = { user: { userId: humanUserId, type: 'agent' } };
 
         await expect(
-          (resolvers.Mutation as any).rejectSubaccount(
+          (resolvers.Mutation as any).rejectAgentBot(
             null,
             { requestId: 'some-id', reason: 'reason' },
             agentContext
           )
-        ).rejects.toThrow('Only human users can reject subaccounts');
+        ).rejects.toThrow('Only human users can reject agent bots');
       });
     });
   });
@@ -555,7 +555,7 @@ await topicService.createTopic({
 
     describe('Query.authRequests', () => {
       it('should return auth requests for applicant', async () => {
-        await subaccountService.createSubaccountWithAuthRequest({
+        await agentBotService.createAgentBotWithAuthRequest({
           parentId: humanUserId,
           name: 'test-subaccount',
           purpose: 'Testing',

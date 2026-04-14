@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export interface ISubaccount {
+export interface IAgentBot {
   parentId: mongoose.Types.ObjectId;
   name: string;
   purpose: string;
@@ -10,9 +10,9 @@ export interface ISubaccount {
   updatedAt: Date;
 }
 
-export type SubaccountDocument = Document & ISubaccount;
+export type AgentBotDocument = Document & IAgentBot;
 
-const SubaccountSchema = new Schema<SubaccountDocument>(
+const AgentBotSchema = new Schema<AgentBotDocument>(
   {
     parentId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     name: { type: String, required: true },
@@ -27,10 +27,10 @@ const SubaccountSchema = new Schema<SubaccountDocument>(
   { timestamps: true }
 );
 
-SubaccountSchema.index({ parentId: 1 });
-SubaccountSchema.index({ apiKey: 1 }, { unique: true });
+AgentBotSchema.index({ parentId: 1 });
+AgentBotSchema.index({ apiKey: 1 }, { unique: true });
 
-export const SubaccountModel = mongoose.model<SubaccountDocument>(
-  'Subaccount',
-  SubaccountSchema
+export const AgentBotModel = mongoose.model<AgentBotDocument>(
+  'AgentBot',
+  AgentBotSchema
 );

@@ -1,9 +1,9 @@
-import { subaccountService, topicService } from '../services';
+import { agentBotService, topicService } from '../services';
 import { AuthRequestModel } from '../models';
 
-export const subaccountResolvers = {
+export const agentBotResolvers = {
   Query: {
-    subaccounts: async (
+    agentBots: async (
       _: unknown,
       __: unknown,
       context: { user?: { userId: string; type: string } }
@@ -11,12 +11,12 @@ export const subaccountResolvers = {
       if (!context.user) {
         throw new Error('Not authenticated');
       }
-      return subaccountService.getSubaccountsByParent(context.user.userId);
+      return agentBotService.getAgentBotsByParent(context.user.userId);
     },
   },
 
   Mutation: {
-    createSubaccount: async (
+    createAgentBot: async (
       _: unknown,
       { name, purpose, reason }: { name: string; purpose: string; reason: string },
       context: { user?: { userId: string; type: string } }
@@ -25,7 +25,7 @@ export const subaccountResolvers = {
         throw new Error('Not authenticated');
       }
 
-      const result = await subaccountService.createSubaccountWithAuthRequest({
+      const result = await agentBotService.createAgentBotWithAuthRequest({
         parentId: context.user.userId,
         name,
         purpose,
@@ -37,7 +37,7 @@ export const subaccountResolvers = {
       return result;
     },
 
-    approveSubaccount: async (
+    approveAgentBot: async (
       _: unknown,
       { requestId }: { requestId: string },
       context: { user?: { userId: string; type: string } }
@@ -46,7 +46,7 @@ export const subaccountResolvers = {
         throw new Error('Not authenticated');
       }
       if (context.user.type.toUpperCase() !== 'HUMAN') {
-        throw new Error('Only human users can approve subaccounts');
+        throw new Error('Only human users can approve agent bots');
       }
 
       const authRequest = await AuthRequestModel.findById(requestId);
@@ -62,13 +62,13 @@ export const subaccountResolvers = {
         await topicService.approveTopic(topic._id.toString());
         authRequest.status = 'APPROVED';
         await authRequest.save();
-        return { status: 'APPROVED', subaccount: null };
+        return { status: 'APPROVED', agentBot: null };
       }
 
-      return subaccountService.approveSubaccount(requestId);
+      return agentBotService.approveAgentBot(requestId);
     },
 
-    rejectSubaccount: async (
+    rejectAgentBot: async (
       _: unknown,
       { requestId, reason }: { requestId: string; reason: string },
       context: { user?: { userId: string; type: string } }
@@ -77,7 +77,7 @@ export const subaccountResolvers = {
         throw new Error('Not authenticated');
       }
       if (context.user.type.toUpperCase() !== 'HUMAN') {
-        throw new Error('Only human users can reject subaccounts');
+        throw new Error('Only human users can reject agent bots');
       }
 
       const authRequest = await AuthRequestModel.findById(requestId);
@@ -93,7 +93,7 @@ export const subaccountResolvers = {
         return true;
       }
 
-      await subaccountService.rejectSubaccount(requestId, reason);
+      await agentBotService.rejectAgentBot(requestId, reason);
       return true;
     },
   },

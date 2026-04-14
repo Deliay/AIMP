@@ -1,8 +1,8 @@
-import { SubaccountModel, SubaccountDocument, AuthRequestModel, UserModel } from '../models';
+import { AgentBotModel, AgentBotDocument, AuthRequestModel, UserModel } from '../models';
 import { generateApiKey } from '../utils';
 import mongoose from 'mongoose';
 
-export interface CreateSubaccountInput {
+export interface CreateAgentBotInput {
   parentId: string;
   name: string;
   purpose: string;
@@ -13,12 +13,12 @@ function isValidObjectId(id: string): boolean {
   return mongoose.Types.ObjectId.isValid(id);
 }
 
-export class SubaccountService {
-  async createSubaccountWithAuthRequest(input: CreateSubaccountInput): Promise<{ requestId: string; status: string }> {
+export class AgentBotService {
+  async createAgentBotWithAuthRequest(input: CreateAgentBotInput): Promise<{ requestId: string; status: string }> {
     const authRequest = await AuthRequestModel.create({
       applicantId: input.parentId,
-      subaccountName: input.name,
-      subaccountPurpose: input.purpose,
+      agentBotName: input.name,
+      agentBotPurpose: input.purpose,
       reason: input.reason,
       status: 'PENDING',
     });
@@ -29,7 +29,7 @@ export class SubaccountService {
     };
   }
 
-  async approveSubaccount(authRequestId: string): Promise<SubaccountDocument> {
+  async approveAgentBot(authRequestId: string): Promise<AgentBotDocument> {
     if (!isValidObjectId(authRequestId)) {
       throw new Error('Auth request not found');
     }
@@ -44,10 +44,10 @@ export class SubaccountService {
 
     const apiKey = generateApiKey();
 
-    const subaccount = await SubaccountModel.create({
+    const agentBot = await AgentBotModel.create({
       parentId: authRequest.applicantId,
-      name: authRequest.subaccountName,
-      purpose: authRequest.subaccountPurpose,
+      name: authRequest.agentBotName,
+      purpose: authRequest.agentBotPurpose,
       apiKey,
       status: 'APPROVED',
     });
@@ -56,17 +56,17 @@ export class SubaccountService {
     await authRequest.save();
 
     await UserModel.create({
-      email: `subaccount_${subaccount._id}@aimp.local`,
+      email: `agentbot_${agentBot._id}@aimp.local`,
       passwordHash: '',
       apiKey,
       type: 'agent',
-      description: authRequest.subaccountPurpose,
+      description: authRequest.agentBotPurpose,
     });
 
-    return subaccount;
+    return agentBot;
   }
 
-  async rejectSubaccount(authRequestId: string, rejectReason: string): Promise<void> {
+  async rejectAgentBot(authRequestId: string, rejectReason: string): Promise<void> {
     if (!isValidObjectId(authRequestId)) {
       throw new Error('Auth request not found');
     }
@@ -80,19 +80,19 @@ export class SubaccountService {
     await authRequest.save();
   }
 
-  async getSubaccountsByParent(parentId: string): Promise<SubaccountDocument[]> {
+  async getAgentBotsByParent(parentId: string): Promise<AgentBotDocument[]> {
     if (!isValidObjectId(parentId)) {
       return [];
     }
-    return SubaccountModel.find({ parentId: new mongoose.Types.ObjectId(parentId) });
+    return AgentBotModel.find({ parentId: new mongoose.Types.ObjectId(parentId) });
   }
 
-  async getSubaccountById(subaccountId: string): Promise<SubaccountDocument | null> {
-    if (!isValidObjectId(subaccountId)) {
+  async getAgentBotById(agentBotId: string): Promise<AgentBotDocument | null> {
+    if (!isValidObjectId(agentBotId)) {
       return null;
     }
-    return SubaccountModel.findById(subaccountId);
+    return AgentBotModel.findById(agentBotId);
   }
 }
 
-export const subaccountService = new SubaccountService();
+export const agentBotService = new AgentBotService();

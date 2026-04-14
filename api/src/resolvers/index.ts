@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { authResolvers } from './auth';
-import { subaccountResolvers } from './subaccount';
+import { agentBotResolvers } from './agentBot';
 import { authRequestResolvers } from './authRequest';
 import { topicResolvers } from './topic';
 import { messageResolvers } from './message';
@@ -9,7 +9,7 @@ import { UserModel } from '../models';
 const baseResolvers = {
   Query: {
     ...authResolvers.Query,
-    ...subaccountResolvers.Query,
+    ...agentBotResolvers.Query,
     ...authRequestResolvers.Query,
     ...topicResolvers.Query,
     ...messageResolvers.Query,
@@ -30,7 +30,7 @@ const baseResolvers = {
 
 const mutationResolvers = {
   ...authResolvers.Mutation,
-  ...subaccountResolvers.Mutation,
+  ...agentBotResolvers.Mutation,
   ...topicResolvers.Mutation,
   ...messageResolvers.Mutation,
 };

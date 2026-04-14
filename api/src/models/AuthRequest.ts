@@ -2,8 +2,8 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IAuthRequest {
   applicantId: mongoose.Types.ObjectId;
-  subaccountName?: string;
-  subaccountPurpose?: string;
+  agentBotName?: string;
+  agentBotPurpose?: string;
   reason: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   rejectReason?: string;
@@ -19,8 +19,8 @@ export type AuthRequestDocument = Document & IAuthRequest;
 const AuthRequestSchema = new Schema<AuthRequestDocument>(
   {
     applicantId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    subaccountName: { type: String },
-    subaccountPurpose: { type: String },
+    agentBotName: { type: String },
+    agentBotPurpose: { type: String },
     reason: { type: String, required: true },
     status: {
       type: String,
