@@ -93,6 +93,44 @@ describe('GraphQL API Contract Tests', () => {
       expect(res.status).toBe(200);
       expect(res.body.data.topics).toBeInstanceOf(Array);
     });
+
+    it('should return topics with all extended fields', async () => {
+      const res = await request(API_URL)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ query: '{ topics { id ownerId slug type name description status unreadCount createdAt updatedAt } }' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.topics).toBeInstanceOf(Array);
+    });
+  });
+
+  describe('Query.searchTopics', () => {
+    it('should return search results with relateScore', async () => {
+      const res = await request(API_URL)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ query: 'query($keyword: String!) { searchTopics(keyword: $keyword) { slug name description relateScore } }', variables: { keyword: 'test' } });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.searchTopics).toBeInstanceOf(Array);
+      res.body.data.searchTopics.forEach(topic => {
+        expect(topic).toHaveProperty('slug');
+        expect(topic).toHaveProperty('name');
+        expect(topic).toHaveProperty('description');
+        expect(topic).toHaveProperty('relateScore');
+      });
+    });
+
+    it('should return empty array for no matches', async () => {
+      const res = await request(API_URL)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ query: 'query($keyword: String!) { searchTopics(keyword: $keyword) { slug relateScore } }', variables: { keyword: 'nonexistentkeyword12345' } });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.searchTopics).toBeInstanceOf(Array);
+    });
   });
 
   describe('Query.topic', () => {
@@ -107,10 +145,30 @@ describe('GraphQL API Contract Tests', () => {
         const res = await request(API_URL)
           .post('/graphql')
           .set('Authorization', `Bearer ${authToken}`)
-          .send({ query: 'query($id: ID!) { topic(id: $id) { id type name unreadCount } }', variables: { id: topicId } });
+          .send({ query: 'query($id: ID!) { topic(id: $id) { id ownerId slug type name description status unreadCount createdAt updatedAt } }', variables: { id: topicId } });
 
         expect(res.status).toBe(200);
         expect(res.body.data.topic).toBeTruthy();
+        expect(res.body.data.topic.id).toBe(topicId);
+      }
+    });
+
+    it('should return topic with members and lastMessage', async () => {
+      const topicsRes = await request(API_URL)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ query: '{ topics { id } }' });
+
+      const topicId = topicsRes.body.data.topics[0]?.id;
+      if (topicId) {
+        const res = await request(API_URL)
+          .post('/graphql')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({ query: 'query($id: ID!) { topic(id: $id) { id members { id email } lastMessage { id content createdAt } } }', variables: { id: topicId } });
+
+        expect(res.status).toBe(200);
+        expect(res.body.data.topic).toBeTruthy();
+        expect(res.body.data.topic.members).toBeInstanceOf(Array);
       }
     });
 
@@ -195,6 +253,191 @@ describe('GraphQL API Contract Tests', () => {
       expect(res.status).toBe(200);
       expect(res.body.data.regenerateApiKey).toBeTruthy();
       expect(res.body.data.regenerateApiKey.apiKey).toMatch(/^ak_/);
+    });
+  });
+
+  describe('Mutation.createTopic', () => {
+    it('should create topic with slug, name and description (Web mode)', async () => {
+      const timestamp = Date.now();
+      const res = await request(API_URL)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          query: `mutation($slug: String!, $name: String!, $description: String!) {
+            createTopic(slug: $slug, name: $name, description: $description) {
+              requestId
+              status
+              topic {
+                id
+                slug
+                name
+                description
+                status
+              }
+            }
+          }`,
+          variables: { slug: `test-topic-${timestamp}`, name: `Test Topic ${timestamp}`, description: 'Test description' }
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.createTopic).toBeTruthy();
+      expect(res.body.data.createTopic.status).toBe('ACTIVE');
+      expect(res.body.data.createTopic.topic).toBeTruthy();
+      expect(res.body.data.createTopic.topic.slug).toBe(`test-topic-${timestamp}`);
+      expect(res.body.data.createTopic.topic.name).toBe(`Test Topic ${timestamp}`);
+      expect(res.body.data.createTopic.topic.description).toBe('Test description');
+    });
+
+    it('should create topic with wait=true (CLI mode, pending status)', async () => {
+      const timestamp = Date.now();
+      const res = await request(API_URL)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          query: `mutation($slug: String!, $name: String!, $description: String!, $wait: Boolean) {
+            createTopic(slug: $slug, name: $name, description: $description, wait: $wait) {
+              requestId
+              status
+              topic {
+                id
+                slug
+                status
+              }
+            }
+          }`,
+          variables: { slug: `cli-topic-${timestamp}`, name: `CLI Topic ${timestamp}`, description: 'CLI test', wait: true }
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.createTopic).toBeTruthy();
+      expect(['PENDING', 'ACTIVE']).toContain(res.body.data.createTopic.status);
+    });
+
+    it('should return error when slug already exists', async () => {
+      const timestamp = Date.now();
+      const slug = `duplicate-slug-${timestamp}`;
+      
+      await request(API_URL)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          query: `mutation($slug: String!, $name: String!, $description: String!) {
+            createTopic(slug: $slug, name: $name, description: $description) {
+              status
+            }
+          }`,
+          variables: { slug, name: `Topic ${timestamp}`, description: 'First creation' }
+        });
+
+      const res = await request(API_URL)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          query: `mutation($slug: String!, $name: String!, $description: String!) {
+            createTopic(slug: $slug, name: $name, description: $description) {
+              status
+            }
+          }`,
+          variables: { slug, name: `Topic ${timestamp}`, description: 'Duplicate' }
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.errors).toBeTruthy();
+    });
+  });
+
+  describe('Mutation.approveTopic', () => {
+    it('should approve pending topic and return active topic', async () => {
+      const timestamp = Date.now();
+      
+      const createRes = await request(API_URL)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          query: `mutation($slug: String!, $name: String!, $description: String!, $wait: Boolean) {
+            createTopic(slug: $slug, name: $name, description: $description, wait: $wait) {
+              requestId
+              status
+            }
+          }`,
+          variables: { slug: `approve-topic-${timestamp}`, name: `Approve Topic ${timestamp}`, description: 'Test approve', wait: true }
+        });
+
+      const requestId = createRes.body.data?.createTopic?.requestId;
+      
+      if (requestId) {
+        const res = await request(API_URL)
+          .post('/graphql')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({
+            query: 'query($requestId: ID!) { approveTopic(requestId: $requestId) { id slug status } }',
+            variables: { requestId }
+          });
+
+        expect(res.status).toBe(200);
+        expect(res.body.data.approveTopic).toBeTruthy();
+        expect(res.body.data.approveTopic.status).toBe('ACTIVE');
+      }
+    });
+  });
+
+  describe('Mutation.rejectTopic', () => {
+    it('should reject pending topic with reason', async () => {
+      const timestamp = Date.now();
+      
+      const createRes = await request(API_URL)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          query: `mutation($slug: String!, $name: String!, $description: String!, $wait: Boolean) {
+            createTopic(slug: $slug, name: $name, description: $description, wait: $wait) {
+              requestId
+              status
+            }
+          }`,
+          variables: { slug: `reject-topic-${timestamp}`, name: `Reject Topic ${timestamp}`, description: 'Test reject', wait: true }
+        });
+
+      const requestId = createRes.body.data?.createTopic?.requestId;
+      
+      if (requestId) {
+        const res = await request(API_URL)
+          .post('/graphql')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({
+            query: 'mutation($requestId: ID!, $reason: String!) { rejectTopic(requestId: $requestId, reason: $reason) }',
+            variables: { requestId, reason: 'Test rejection reason' }
+          });
+
+        expect(res.status).toBe(200);
+        expect(res.body.data.rejectTopic).toBe(true);
+      }
+    });
+  });
+
+  describe('Mutation.clearTopicMessages', () => {
+    it('should clear topic messages and return cleared count', async () => {
+      const topicsRes = await request(API_URL)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ query: '{ topics { id } }' });
+
+      const topicId = topicsRes.body.data.topics[0]?.id;
+      
+      if (topicId) {
+        const res = await request(API_URL)
+          .post('/graphql')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({
+            query: 'mutation($topicId: ID!) { clearTopicMessages(topicId: $topicId) { status clearedCount } }',
+            variables: { topicId }
+          });
+
+        expect(res.status).toBe(200);
+        expect(res.body.data.clearTopicMessages).toBeTruthy();
+        expect(res.body.data.clearTopicMessages.status).toBe('ok');
+        expect(typeof res.body.data.clearTopicMessages.clearedCount).toBe('number');
+      }
     });
   });
 });

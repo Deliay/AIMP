@@ -82,7 +82,7 @@ export const topicResolvers = {
         throw new Error('Topic with this slug already exists');
       }
 
-      if (wait && context.user.type === 'AGENT') {
+      if (wait && context.user.type.toUpperCase() === 'AGENT') {
         const topic = await topicService.createPendingTopic({
           type: 'group',
           slug,
@@ -122,7 +122,7 @@ export const topicResolvers = {
         throw new Error('Not authenticated');
       }
 
-      if (context.user.type !== 'HUMAN') {
+      if (context.user.type.toUpperCase() !== 'HUMAN') {
         throw new Error('Only human users can approve topics');
       }
 
@@ -143,7 +143,7 @@ export const topicResolvers = {
         throw new Error('Not authenticated');
       }
 
-      if (context.user.type !== 'HUMAN') {
+      if (context.user.type.toUpperCase() !== 'HUMAN') {
         throw new Error('Only human users can reject topics');
       }
 
@@ -162,7 +162,7 @@ export const topicResolvers = {
         throw new Error('Not authenticated');
       }
 
-      if (context.user.type !== 'HUMAN') {
+      if (context.user.type.toUpperCase() !== 'HUMAN') {
         throw new Error('Only human users can clear topic messages');
       }
 
@@ -181,6 +181,9 @@ export const topicResolvers = {
   },
 
   Topic: {
+    id: (topic: { _id: mongoose.Types.ObjectId }) => topic._id.toString(),
+    type: (topic: { type: string }) => topic.type.toUpperCase(),
+    status: (topic: { status: string }) => topic.status.toUpperCase(),
     members: async (topic: { members: mongoose.Types.ObjectId[] }) => {
       const memberIds = topic.members.map((m) => m.toString());
       return UserModel.find({ _id: { $in: memberIds } });
