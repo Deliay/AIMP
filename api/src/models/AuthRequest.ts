@@ -2,11 +2,14 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IAuthRequest {
   applicantId: mongoose.Types.ObjectId;
-  subaccountName: string;
-  subaccountPurpose: string;
+  subaccountName?: string;
+  subaccountPurpose?: string;
   reason: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   rejectReason?: string;
+  topicName?: string;
+  topicSlug?: string;
+  topicDescription?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,8 +19,8 @@ export type AuthRequestDocument = Document & IAuthRequest;
 const AuthRequestSchema = new Schema<AuthRequestDocument>(
   {
     applicantId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    subaccountName: { type: String, required: true },
-    subaccountPurpose: { type: String, required: true },
+    subaccountName: { type: String },
+    subaccountPurpose: { type: String },
     reason: { type: String, required: true },
     status: {
       type: String,
@@ -25,6 +28,9 @@ const AuthRequestSchema = new Schema<AuthRequestDocument>(
       default: 'PENDING',
     },
     rejectReason: { type: String },
+    topicName: { type: String },
+    topicSlug: { type: String },
+    topicDescription: { type: String },
   },
   { timestamps: true }
 );

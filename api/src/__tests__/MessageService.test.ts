@@ -36,13 +36,13 @@ describe('MessageService', () => {
       const topic = await messageService.sendMessage({
         topicId,
         senderId,
-        type: 'text',
+        type: 'TEXT',
         content: { text: 'Hello, world!' },
       });
 
       expect(topic.messages).toHaveLength(1);
       expect(topic.messages[0].content).toEqual({ text: 'Hello, world!' });
-      expect(topic.messages[0].type).toBe('text');
+      expect(topic.messages[0].type).toBe('TEXT');
       expect(topic.messages[0].senderId.toString()).toBe(senderId);
     });
 
@@ -50,26 +50,37 @@ describe('MessageService', () => {
       const formContent = {
         fields: [
           { name: 'email', type: 'email', required: true },
-          { name: 'message', type: 'text', required: true },
+          { name: 'message', type: 'TEXT', required: true },
         ],
       };
 
       const topic = await messageService.sendMessage({
         topicId,
         senderId,
-        type: 'form',
+        type: 'FORM',
         content: formContent,
       });
 
-      expect(topic.messages[0].type).toBe('form');
+      expect(topic.messages[0].type).toBe('FORM');
       expect(topic.messages[0].content).toEqual(formContent);
+    });
+
+    it('should store uppercase message type', async () => {
+      const topic = await messageService.sendMessage({
+        topicId,
+        senderId,
+        type: 'TEXT',
+        content: { text: 'Hello with uppercase!' },
+      });
+
+      expect(topic.messages[0].type).toBe('TEXT');
     });
 
     it('should add sender to readBy automatically', async () => {
       const topic = await messageService.sendMessage({
         topicId,
         senderId,
-        type: 'text',
+        type: 'TEXT',
         content: { text: 'Hello!' },
       });
 
@@ -82,7 +93,7 @@ describe('MessageService', () => {
         messageService.sendMessage({
           topicId: 'nonexistent-id',
           senderId,
-          type: 'text',
+          type: 'TEXT',
           content: { text: 'Hello!' },
         })
       ).rejects.toThrow('Topic not found');
@@ -98,7 +109,7 @@ describe('MessageService', () => {
         messageService.sendMessage({
           topicId,
           senderId: otherUserResult.userId,
-          type: 'text',
+          type: 'TEXT',
           content: { text: 'Hello!' },
         })
       ).rejects.toThrow('Not authorized to send message to this topic');
@@ -110,7 +121,7 @@ describe('MessageService', () => {
       await messageService.sendMessage({
         topicId,
         senderId,
-        type: 'text',
+        type: 'TEXT',
         content: { text: 'Hello!' },
       });
 
@@ -126,7 +137,7 @@ describe('MessageService', () => {
       await messageService.sendMessage({
         topicId,
         senderId,
-        type: 'text',
+        type: 'TEXT',
         content: { text: 'Hello!' },
       });
 
@@ -146,7 +157,7 @@ describe('MessageService', () => {
       await messageService.sendMessage({
         topicId,
         senderId,
-        type: 'text',
+        type: 'TEXT',
         content: { text: 'Hello!' },
       });
 
@@ -160,14 +171,14 @@ describe('MessageService', () => {
       await messageService.sendMessage({
         topicId,
         senderId,
-        type: 'text',
+        type: 'TEXT',
         content: { text: 'Message 1' },
       });
 
       await messageService.sendMessage({
         topicId,
         senderId,
-        type: 'text',
+        type: 'TEXT',
         content: { text: 'Message 2' },
       });
 
@@ -186,7 +197,7 @@ describe('MessageService', () => {
       await messageService.sendMessage({
         topicId,
         senderId,
-        type: 'text',
+        type: 'TEXT',
         content: { text: 'Hello!' },
       });
 

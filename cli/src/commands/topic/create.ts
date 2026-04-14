@@ -172,23 +172,21 @@ async function pollForApproval(
   intervalMs = 5000
 ): Promise<void> {
   for (let i = 0; i < maxAttempts; i++) {
-    const response = await client.graphql<TopicStatusResponse>(`
-      query {
-        topics {
+    const response = await client.graphql<{ authRequests: Array<{ id: string; status: string }> }>(`
+      query GetAuthRequests {
+        authRequests {
           id
-          slug
-          name
           status
         }
       }
     `)
 
-    const topic = response.topics.find(t => t.id === requestId)
-    if (topic?.status === 'ACTIVE') {
+    const request = response.authRequests.find(r => r.id === requestId)
+    if (request?.status === 'APPROVED') {
       return
     }
 
-    if (topic?.status === 'REJECTED') {
+    if (request?.status === 'REJECTED') {
       throw new Error('Topic 创建申请被拒绝')
     }
 

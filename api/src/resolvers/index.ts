@@ -1,8 +1,10 @@
+import mongoose from 'mongoose';
 import { authResolvers } from './auth';
 import { subaccountResolvers } from './subaccount';
 import { authRequestResolvers } from './authRequest';
 import { topicResolvers } from './topic';
 import { messageResolvers } from './message';
+import { UserModel } from '../models';
 
 const baseResolvers = {
   Query: {
@@ -15,6 +17,15 @@ const baseResolvers = {
   Topic: topicResolvers.Topic,
   User: authResolvers.User,
   AuthRequest: authRequestResolvers.AuthRequest,
+  Message: {
+    id: (message: { _id?: any }) => String(message._id || ''),
+    topicId: (message: { topicId?: string }) => String(message.topicId || ''),
+    sender: async (message: { senderId?: any }) => message.senderId ? UserModel.findById(message.senderId) : null,
+    type: (message: { type?: string }) => String(message.type || 'TEXT').toUpperCase(),
+    content: (message: { content?: any }) => message.content || {},
+    readBy: (message: { readBy?: any[] }) => Array.isArray(message.readBy) ? message.readBy.map((r: any) => String(r)) : [],
+    createdAt: (message: { createdAt?: Date }) => message.createdAt || new Date(),
+  },
 };
 
 const mutationResolvers = {

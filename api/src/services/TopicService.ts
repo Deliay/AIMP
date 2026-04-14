@@ -1,4 +1,4 @@
-import { TopicModel, TopicDocument, ITopic } from '../models';
+import { TopicModel, TopicDocument, ITopic, AuthRequestModel } from '../models';
 import mongoose from 'mongoose';
 
 export interface CreateTopicInput {
@@ -54,6 +54,35 @@ export class TopicService {
     });
 
     return topic;
+  }
+
+  async createPendingTopicWithAuthRequest(input: CreateTopicInput): Promise<{ topic: TopicDocument; requestId: string }> {
+    const authRequest = await AuthRequestModel.create({
+      applicantId: new mongoose.Types.ObjectId(input.ownerId),
+      reason: `Topic creation: ${input.name}`,
+      status: 'PENDING',
+      topicName: input.name,
+      topicSlug: input.slug,
+      topicDescription: input.description || '',
+    });
+
+    const topic = await TopicModel.create({
+      type: input.type,
+      slug: input.slug,
+      name: input.name,
+      description: input.description || '',
+      status: 'pending',
+      ownerId: new mongoose.Types.ObjectId(input.ownerId),
+      members: input.members?.map((id) => new mongoose.Types.ObjectId(id)) || [
+        new mongoose.Types.ObjectId(input.ownerId),
+      ],
+      messages: [],
+    });
+
+    return {
+      topic,
+      requestId: authRequest._id.toString(),
+    };
   }
 
   async createAuthTopic(authRequestId: string, ownerId: string): Promise<TopicDocument> {

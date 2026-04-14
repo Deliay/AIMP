@@ -1,4 +1,5 @@
 import { subaccountService, topicService } from '../services';
+import { AuthRequestModel } from '../models';
 
 export const subaccountResolvers = {
   Query: {
@@ -44,9 +45,26 @@ export const subaccountResolvers = {
       if (!context.user) {
         throw new Error('Not authenticated');
       }
-      if (context.user.type !== 'human') {
+      if (context.user.type.toUpperCase() !== 'HUMAN') {
         throw new Error('Only human users can approve subaccounts');
       }
+
+      const authRequest = await AuthRequestModel.findById(requestId);
+      if (!authRequest) {
+        throw new Error('Auth request not found');
+      }
+
+      if (authRequest.topicSlug) {
+        const topic = await topicService.getTopicBySlug(authRequest.topicSlug);
+        if (!topic) {
+          throw new Error('Topic not found');
+        }
+        await topicService.approveTopic(topic._id.toString());
+        authRequest.status = 'APPROVED';
+        await authRequest.save();
+        return { status: 'APPROVED', subaccount: null };
+      }
+
       return subaccountService.approveSubaccount(requestId);
     },
 
@@ -58,9 +76,23 @@ export const subaccountResolvers = {
       if (!context.user) {
         throw new Error('Not authenticated');
       }
-      if (context.user.type !== 'human') {
+      if (context.user.type.toUpperCase() !== 'HUMAN') {
         throw new Error('Only human users can reject subaccounts');
       }
+
+      const authRequest = await AuthRequestModel.findById(requestId);
+      if (authRequest && authRequest.topicSlug) {
+        const topic = await topicService.getTopicBySlug(authRequest.topicSlug);
+        if (topic) {
+          await topicService.rejectTopic(topic._id.toString());
+          await topicService.deleteTopic(topic._id.toString());
+        }
+        authRequest.status = 'REJECTED';
+        authRequest.rejectReason = reason;
+        await authRequest.save();
+        return true;
+      }
+
       await subaccountService.rejectSubaccount(requestId, reason);
       return true;
     },

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { topicService, messageService } from '../services';
-import { UserModel } from '../models';
+import { UserModel, AuthRequestModel } from '../models';
 
 export const topicResolvers = {
   Query: {
@@ -82,8 +82,8 @@ export const topicResolvers = {
         throw new Error('Topic with this slug already exists');
       }
 
-      if (wait && context.user.type.toUpperCase() === 'AGENT') {
-        const topic = await topicService.createPendingTopic({
+      if (wait) {
+        const { topic, requestId } = await topicService.createPendingTopicWithAuthRequest({
           type: 'group',
           slug,
           name,
@@ -92,7 +92,7 @@ export const topicResolvers = {
         });
 
         return {
-          requestId: topic._id.toString(),
+          requestId,
           status: 'PENDING',
           topic,
         };
@@ -126,12 +126,22 @@ export const topicResolvers = {
         throw new Error('Only human users can approve topics');
       }
 
-      const topic = await topicService.approveTopic(requestId);
+      const authRequest = await AuthRequestModel.findById(requestId);
+      if (!authRequest) {
+        throw new Error('Auth request not found');
+      }
+
+      const topic = await topicService.getTopicBySlug(authRequest.topicSlug!);
       if (!topic) {
         throw new Error('Topic not found');
       }
 
-      return topic;
+      await topicService.approveTopic(topic._id.toString());
+
+      authRequest.status = 'APPROVED';
+      await authRequest.save();
+
+      return topicService.getTopicById(topic._id.toString());
     },
 
     rejectTopic: async (
@@ -147,8 +157,20 @@ export const topicResolvers = {
         throw new Error('Only human users can reject topics');
       }
 
-      await topicService.rejectTopic(requestId);
-      await topicService.deleteTopic(requestId);
+      const authRequest = await AuthRequestModel.findById(requestId);
+      if (authRequest && authRequest.topicSlug) {
+        const topic = await topicService.getTopicBySlug(authRequest.topicSlug);
+        if (topic) {
+          await topicService.rejectTopic(topic._id.toString());
+          await topicService.deleteTopic(topic._id.toString());
+        }
+      }
+
+      if (authRequest) {
+        authRequest.status = 'REJECTED';
+        authRequest.rejectReason = reason;
+        await authRequest.save();
+      }
 
       return true;
     },
@@ -197,7 +219,7 @@ export const topicResolvers = {
       return {
         id: lastMsg._id?.toString() || '',
         topicId: '',
-        sender,
+        sender: sender || { id: 'deleted', email: 'deleted@local', type: 'UNKNOWN', description: null, createdAt: new Date(), updatedAt: new Date() },
         type: lastMsg.type.toUpperCase(),
         content: lastMsg.content,
         readBy: lastMsg.readBy.map((r) => r.toString()),

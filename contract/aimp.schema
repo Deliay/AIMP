@@ -77,11 +77,14 @@ type CreateSubaccountPayload {
 type AuthRequest {
   id: ID!
   applicant: User!
-  subaccountName: String!
-  subaccountPurpose: String!
+  subaccountName: String
+  subaccountPurpose: String
   reason: String!
   status: SubaccountStatus!
   rejectReason: String
+  topicName: String
+  topicSlug: String
+  topicDescription: String
   createdAt: DateTime!
   updatedAt: DateTime!
 }

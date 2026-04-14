@@ -345,7 +345,7 @@ await topicService.createTopic({
         await messageService.sendMessage({
           topicId: topic._id.toString(),
           senderId: userId,
-          type: 'text',
+          type: 'TEXT',
           content: { text: 'Hello!' },
         });
 
@@ -395,7 +395,7 @@ await topicService.createTopic({
         await messageService.sendMessage({
           topicId: topic._id.toString(),
           senderId: userId,
-          type: 'text',
+          type: 'TEXT',
           content: { text: 'Unread message' },
         });
 
@@ -421,7 +421,7 @@ await topicService.createTopic({
         await messageService.sendMessage({
           topicId: topic._id.toString(),
           senderId: userId,
-          type: 'text',
+          type: 'TEXT',
           content: { text: 'Read message' },
         });
 
@@ -476,7 +476,7 @@ await topicService.createTopic({
         await messageService.sendMessage({
           topicId,
           senderId,
-          type: 'text',
+          type: 'TEXT',
           content: { text: 'Hello!' },
         });
 
@@ -487,7 +487,7 @@ await topicService.createTopic({
         );
 
         expect(result).toBeTruthy();
-        expect(result.messages).toHaveLength(1);
+        expect(result).toHaveLength(1);
       });
 
       it('should throw error when not authenticated', async () => {
@@ -501,19 +501,19 @@ await topicService.createTopic({
       it('should send message', async () => {
         const result = await (resolvers.Mutation as any).sendMessage(
           null,
-          { topicId, type: 'text', content: { text: 'Hello!' } },
+          { topicId, type: 'TEXT', content: { text: 'Hello!' } },
           senderContext
         );
 
-        expect(result.messages).toHaveLength(1);
-        expect(result.messages[0].content).toEqual({ text: 'Hello!' });
+        expect(result).toBeTruthy();
+        expect(result.content).toEqual({ text: 'Hello!' });
       });
 
       it('should throw error when not authenticated', async () => {
         await expect(
           (resolvers.Mutation as any).sendMessage(
             null,
-            { topicId, type: 'text', content: { text: 'Hello!' } },
+            { topicId, type: 'TEXT', content: { text: 'Hello!' } },
             {}
           )
         ).rejects.toThrow('Not authenticated');
@@ -525,7 +525,7 @@ await topicService.createTopic({
         await messageService.sendMessage({
           topicId,
           senderId,
-          type: 'text',
+          type: 'TEXT',
           content: { text: 'Hello!' },
         });
 

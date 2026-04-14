@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 export interface SendMessageInput {
   topicId: string;
   senderId: string;
-  type: 'text' | 'form';
+  type: 'TEXT' | 'FORM';
   content: Record<string, unknown>;
 }
 
