@@ -6,6 +6,7 @@ import { makeLogoutCommand } from './commands/logout'
 import { makeWhoamiCommand } from './commands/whoami'
 import { makeSubaccountCommands } from './commands/subaccount'
 import { makeChatCommands } from './commands/chat'
+import { makeTopicCommands } from './commands/topic'
 
 const program = new Command()
 
@@ -24,5 +25,6 @@ makeLogoutCommand(program)
 makeWhoamiCommand(program)
 makeSubaccountCommands(program)
 makeChatCommands(program)
+makeTopicCommands(program)
 
 program.parse(process.argv)

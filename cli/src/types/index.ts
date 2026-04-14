@@ -68,3 +68,36 @@ export interface GlobalOptions {
   json?: boolean
   verbose?: boolean
 }
+
+export interface Topic {
+  id: string
+  slug: string
+  name: string
+  description: string
+  type: 'DIRECT' | 'GROUP' | 'AUTH'
+  status: 'PENDING' | 'ACTIVE' | 'REJECTED'
+  createdAt: string
+}
+
+export interface TopicSearchResult {
+  slug: string
+  name: string
+  description: string
+  relateScore: number
+}
+
+export interface CreateTopicResponse {
+  createTopic: {
+    requestId?: string
+    status: string
+    topic?: Topic
+  }
+}
+
+export interface TopicsResponse {
+  topics: Topic[]
+}
+
+export interface SearchTopicsResponse {
+  searchTopics: TopicSearchResult[]
+}
