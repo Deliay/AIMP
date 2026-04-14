@@ -40,21 +40,21 @@ describe('GraphQL API Contract Tests', () => {
     });
   });
 
-  describe('Query.subaccounts', () => {
-    it('should return subaccounts for authenticated user', async () => {
+  describe('Query.agentBots', () => {
+    it('should return agent bots for authenticated user', async () => {
       const res = await request(API_URL)
         .post('/graphql')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ query: '{ subaccounts { id name purpose status createdAt } }' });
+        .send({ query: '{ agentBots { id name purpose status createdAt } }' });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.subaccounts).toBeInstanceOf(Array);
+      expect(res.body.data.agentBots).toBeInstanceOf(Array);
     });
 
     it('should throw error when not authenticated', async () => {
       const res = await request(API_URL)
         .post('/graphql')
-        .send({ query: '{ subaccounts { id } }' });
+        .send({ query: '{ agentBots { id } }' });
 
       expect(res.status).toBe(200);
       expect(res.body.errors).toBeTruthy();
@@ -66,7 +66,7 @@ describe('GraphQL API Contract Tests', () => {
       const res = await request(API_URL)
         .post('/graphql')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ query: '{ authRequests { id subaccountName status createdAt } }' });
+        .send({ query: '{ authRequests { id agentBotName status createdAt } }' });
 
       expect(res.status).toBe(200);
       expect(res.body.data.authRequests).toBeInstanceOf(Array);
@@ -221,14 +221,14 @@ describe('GraphQL API Contract Tests', () => {
     });
   });
 
-  describe('Mutation.createSubaccount', () => {
-    it('should create subaccount with auth request', async () => {
+  describe('Mutation.createAgentBot', () => {
+    it('should create agent bot with auth request', async () => {
       const res = await request(API_URL)
         .post('/graphql')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           query: `mutation($name: String!, $purpose: String!, $reason: String!) {
-            createSubaccount(name: $name, purpose: $purpose, reason: $reason) {
+            createAgentBot(name: $name, purpose: $purpose, reason: $reason) {
               requestId
               status
             }
@@ -237,9 +237,9 @@ describe('GraphQL API Contract Tests', () => {
         });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.createSubaccount).toBeTruthy();
-      expect(res.body.data.createSubaccount.requestId).toBeTruthy();
-      expect(res.body.data.createSubaccount.status).toBe('PENDING');
+      expect(res.body.data.createAgentBot).toBeTruthy();
+      expect(res.body.data.createAgentBot.requestId).toBeTruthy();
+      expect(res.body.data.createAgentBot.status).toBe('PENDING');
     });
   });
 
