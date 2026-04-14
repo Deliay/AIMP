@@ -210,16 +210,16 @@ export const topicResolvers = {
       const memberIds = topic.members.map((m) => m.toString());
       return UserModel.find({ _id: { $in: memberIds } });
     },
-    lastMessage: async (topic: { messages: Array<{ _id?: mongoose.Types.ObjectId; senderId: mongoose.Types.ObjectId; type: string; content: Record<string, unknown>; readBy: mongoose.Types.ObjectId[]; createdAt: Date }> }) => {
+    lastMessage: async (topic: { messages: Array<{ _id?: mongoose.Types.ObjectId; senderId: mongoose.Types.ObjectId; senderType: 'user' | 'agentbot'; type: string; content: Record<string, unknown>; readBy: mongoose.Types.ObjectId[]; createdAt: Date }> }) => {
       if (!topic.messages || topic.messages.length === 0) {
         return null;
       }
       const lastMsg = topic.messages[topic.messages.length - 1];
-      const sender = await UserModel.findById(lastMsg.senderId);
       return {
         id: lastMsg._id?.toString() || '',
-        topicId: '',
-        sender: sender || { id: 'deleted', email: 'deleted@local', type: 'UNKNOWN', description: null, createdAt: new Date(), updatedAt: new Date() },
+        topicId: topic._id.toString(),
+        senderId: lastMsg.senderId.toString(),
+        senderType: lastMsg.senderType,
         type: lastMsg.type.toUpperCase(),
         content: lastMsg.content,
         readBy: lastMsg.readBy.map((r) => r.toString()),
