@@ -14,6 +14,7 @@ const baseResolvers = {
   },
   Topic: topicResolvers.Topic,
   User: authResolvers.User,
+  AuthRequest: authRequestResolvers.AuthRequest,
 };
 
 const mutationResolvers = {

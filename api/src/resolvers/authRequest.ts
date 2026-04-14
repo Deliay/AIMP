@@ -1,4 +1,4 @@
-import { AuthRequestModel } from '../models';
+import { AuthRequestModel, UserModel } from '../models';
 
 export const authRequestResolvers = {
   Query: {
@@ -13,6 +13,11 @@ export const authRequestResolvers = {
       return AuthRequestModel.find({ applicantId: context.user.userId }).sort({
         createdAt: -1,
       });
+    },
+  },
+  AuthRequest: {
+    applicant: async (authRequest: { applicantId: string }) => {
+      return UserModel.findById(authRequest.applicantId);
     },
   },
 };

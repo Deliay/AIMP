@@ -20,7 +20,7 @@ export class SubaccountService {
       subaccountName: input.name,
       subaccountPurpose: input.purpose,
       reason: input.reason,
-      status: 'pending',
+      status: 'PENDING',
     });
 
     return {
@@ -38,7 +38,7 @@ export class SubaccountService {
       throw new Error('Auth request not found');
     }
 
-    if (authRequest.status !== 'pending') {
+    if (authRequest.status !== 'PENDING') {
       throw new Error('Auth request is not pending');
     }
 
@@ -49,10 +49,10 @@ export class SubaccountService {
       name: authRequest.subaccountName,
       purpose: authRequest.subaccountPurpose,
       apiKey,
-      status: 'approved',
+      status: 'APPROVED',
     });
 
-    authRequest.status = 'approved';
+    authRequest.status = 'APPROVED';
     await authRequest.save();
 
     await UserModel.create({
@@ -75,7 +75,7 @@ export class SubaccountService {
       throw new Error('Auth request not found');
     }
 
-    authRequest.status = 'rejected';
+    authRequest.status = 'REJECTED';
     authRequest.rejectReason = rejectReason;
     await authRequest.save();
   }

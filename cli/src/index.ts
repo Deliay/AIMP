@@ -15,7 +15,7 @@ program
   .version('0.1.0')
 
 program
-  .option('--server <URL>', '指定 API 服务器地址')
+  .option('--server-url <URL>', '指定 API 服务器地址')
   .option('--json', '输出 JSON 格式')
   .option('--verbose', '显示详细调试信息')
 

@@ -29,11 +29,12 @@ export const makeSubaccountCreateCommand = (program: Command) => {
     .requiredOption('--purpose <PURPOSE>', '子帐号用途')
     .requiredOption('--reason <REASON>', '详细申请原因')
     .option('--wait', '等待人类审批后继续')
-    .action(async (options) => {
+    .action(async (options, cmd) => {
       const spinner = ora('正在提交申请...').start()
 
       try {
-        const client = getApiClient(resolve.serverUrl())
+        const serverUrl = cmd.parent?.opts()?.serverUrl;
+        const client = getApiClient(resolve.serverUrl(serverUrl));
 
         const response = await client.graphql<CreateSubaccountResponse>(`
           mutation CreateSubaccount($name: String!, $purpose: String!, $reason: String!) {
@@ -74,26 +75,21 @@ async function pollForApproval(
 ): Promise<void> {
   for (let i = 0; i < maxAttempts; i++) {
     const response = await client.graphql<SubaccountStatusResponse>(`
-      query GetAuthRequest($status: SubaccountStatus) {
-        authRequests(status: $status) {
+      query GetAuthRequests {
+        authRequests {
           id
           status
-          subaccount {
-            apiKey
-          }
         }
       }
-    `, { status: 'PENDING' })
+    `)
 
     const request = response.authRequests.find(r => r.id === requestId)
-    if (request && request.status === 'APPROVED') {
-      if (request.subaccount?.apiKey) {
-        console.log(chalk.blue('子帐号 API Key:'), request.subaccount.apiKey)
-      }
+    if (request?.status === 'APPROVED') {
+      console.log(chalk.green('✓ 审批通过'))
       return
     }
 
-    if (request && request.status === 'REJECTED') {
+    if (request?.status === 'REJECTED') {
       throw new Error('申请被拒绝')
     }
 

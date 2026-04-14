@@ -20,11 +20,12 @@ export const makeSubaccountListCommand = (program: Command) => {
   program
     .command('list')
     .description('列出当前帐号的子帐号')
-    .action(async () => {
+    .action(async (_, cmd) => {
       const spinner = ora('正在获取子帐号列表...').start()
 
       try {
-        const client = getApiClient(resolve.serverUrl())
+        const serverUrl = cmd.parent?.opts()?.serverUrl;
+        const client = getApiClient(resolve.serverUrl(serverUrl));
         const response = await client.graphql<SubaccountsResponse>(`
           query {
             subaccounts {

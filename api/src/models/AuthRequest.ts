@@ -5,7 +5,7 @@ export interface IAuthRequest {
   subaccountName: string;
   subaccountPurpose: string;
   reason: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
   rejectReason?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -21,8 +21,8 @@ const AuthRequestSchema = new Schema<AuthRequestDocument>(
     reason: { type: String, required: true },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'rejected'],
-      default: 'pending',
+      enum: ['PENDING', 'APPROVED', 'REJECTED'],
+      default: 'PENDING',
     },
     rejectReason: { type: String },
   },

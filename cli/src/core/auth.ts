@@ -4,6 +4,7 @@ import { LoginResponse } from '../types'
 
 export const auth = {
     async login(apiKey: string, serverUrl?: string): Promise<LoginResponse> {
+
     const client = getApiClient(serverUrl)
 
     try {

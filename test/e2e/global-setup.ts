@@ -6,7 +6,7 @@ async function globalSetup(config: FullConfig) {
   
   const testEmail = `test-human-${Date.now()}@aimp.test`;
   const testPassword = 'Password123!';
-  const baseURL = 'http://localhost:39591';
+  const baseURL = process.env.FE_URL || 'http://localhost:39591';
   
   const registerResponse = await fetch(`${baseURL}/api/auth/register`, {
     method: 'POST',

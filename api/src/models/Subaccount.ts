@@ -5,7 +5,7 @@ export interface ISubaccount {
   name: string;
   purpose: string;
   apiKey: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,8 +20,8 @@ const SubaccountSchema = new Schema<SubaccountDocument>(
     apiKey: { type: String, required: true, unique: true },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'rejected'],
-      default: 'pending',
+      enum: ['PENDING', 'APPROVED', 'REJECTED'],
+      default: 'PENDING',
     },
   },
   { timestamps: true }
