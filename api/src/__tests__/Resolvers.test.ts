@@ -190,7 +190,7 @@ describe('Resolvers', () => {
         );
 
         expect(result).toHaveProperty('_id');
-        expect(result.status).toBe('approved');
+        expect(result.status).toBe('APPROVED');
       });
 
       it('should throw error when user is not human', async () => {
@@ -253,8 +253,9 @@ describe('Resolvers', () => {
 
     describe('Query.topics', () => {
       it('should return topics for user', async () => {
-        await topicService.createTopic({
+await topicService.createTopic({
           type: 'direct',
+          slug: 'test-topic-resolver-1',
           name: 'Test Topic',
           ownerId: userId,
         });
@@ -274,6 +275,7 @@ describe('Resolvers', () => {
       it('should return topic when user is member', async () => {
         const topic = await topicService.createTopic({
           type: 'direct',
+          slug: 'test-topic-member',
           name: 'Test Topic',
           ownerId: userId,
         });
@@ -296,6 +298,7 @@ describe('Resolvers', () => {
 
         const topic = await topicService.createTopic({
           type: 'direct',
+          slug: 'test-topic-private',
           name: 'Private Topic',
           ownerId: otherResult.userId,
         });
@@ -315,6 +318,7 @@ describe('Resolvers', () => {
 
         const topic = await topicService.createTopic({
           type: 'group',
+          slug: 'test-topic-members',
           name: 'Group Topic',
           ownerId: userId,
           members: [userId, otherResult.userId],
@@ -333,6 +337,7 @@ describe('Resolvers', () => {
       it('should resolve Topic.lastMessage field when messages exist', async () => {
         const topic = await topicService.createTopic({
           type: 'direct',
+          slug: 'test-topic-lastmsg',
           name: 'Chat Topic',
           ownerId: userId,
         });
@@ -358,6 +363,7 @@ describe('Resolvers', () => {
       it('should resolve Topic.lastMessage to null when no messages', async () => {
         const topic = await topicService.createTopic({
           type: 'direct',
+          slug: 'test-topic-empty',
           name: 'Empty Topic',
           ownerId: userId,
         });
@@ -380,6 +386,7 @@ describe('Resolvers', () => {
 
         const topic = await topicService.createTopic({
           type: 'direct',
+          slug: 'test-topic-unread',
           name: 'Unread Topic',
           ownerId: userId,
           members: [userId, recipient.userId],
@@ -406,6 +413,7 @@ describe('Resolvers', () => {
       it('should return 0 unreadCount when all messages are read', async () => {
         const topic = await topicService.createTopic({
           type: 'direct',
+          slug: 'test-topic-read',
           name: 'Read Topic',
           ownerId: userId,
         });
@@ -455,6 +463,7 @@ describe('Resolvers', () => {
 
       const topic = await topicService.createTopic({
         type: 'direct',
+        slug: 'test-topic-messages',
         name: 'Test Topic',
         ownerId: senderId,
         members: [senderId, recipientId],

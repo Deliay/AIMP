@@ -1,6 +1,5 @@
 overwrite: true
 schema: ../contract/aimp.schema
-documents: null
 generates:
   src/__generated__/types.ts:
     plugins:

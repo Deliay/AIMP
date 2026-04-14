@@ -10,7 +10,10 @@ export interface IMessage {
 
 export interface ITopic {
   type: 'direct' | 'group' | 'auth';
+  slug: string;
   name: string;
+  description: string;
+  status: 'pending' | 'active' | 'rejected';
   ownerId: mongoose.Types.ObjectId;
   members: mongoose.Types.ObjectId[];
   messages: IMessage[];
@@ -35,7 +38,10 @@ MessageSchema.set('timestamps', { createdAt: true, updatedAt: false });
 const TopicSchema = new Schema<TopicDocument>(
   {
     type: { type: String, enum: ['direct', 'group', 'auth'], required: true },
+    slug: { type: String, required: true, unique: true },
     name: { type: String, required: true },
+    description: { type: String, default: '' },
+    status: { type: String, enum: ['pending', 'active', 'rejected'], default: 'active' },
     ownerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     messages: [MessageSchema],
@@ -45,5 +51,7 @@ const TopicSchema = new Schema<TopicDocument>(
 
 TopicSchema.index({ type: 1 });
 TopicSchema.index({ members: 1 });
+TopicSchema.index({ slug: 1 }, { unique: true });
+TopicSchema.index({ name: 'text', description: 'text' });
 
 export const TopicModel = mongoose.model<TopicDocument>('Topic', TopicSchema);

@@ -23,6 +23,7 @@ describe('MessageService', () => {
 
     const topic = await topicService.createTopic({
       type: 'direct',
+      slug: 'test-topic-messages',
       name: 'Test Topic',
       ownerId: senderId,
       members: [senderId, recipientId],

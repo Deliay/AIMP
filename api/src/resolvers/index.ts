@@ -20,6 +20,7 @@ const baseResolvers = {
 const mutationResolvers = {
   ...authResolvers.Mutation,
   ...subaccountResolvers.Mutation,
+  ...topicResolvers.Mutation,
   ...messageResolvers.Mutation,
 };
 

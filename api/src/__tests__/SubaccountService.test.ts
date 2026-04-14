@@ -31,7 +31,7 @@ describe('SubaccountService', () => {
       expect(authRequest).toBeTruthy();
       expect(authRequest?.subaccountName).toBe('data-collector');
       expect(authRequest?.subaccountPurpose).toBe('Data collection agent');
-      expect(authRequest?.status).toBe('pending');
+      expect(authRequest?.status).toBe('PENDING');
     });
   });
 
@@ -49,11 +49,11 @@ describe('SubaccountService', () => {
       expect(subaccount).toHaveProperty('_id');
       expect(subaccount.name).toBe('data-collector');
       expect(subaccount.purpose).toBe('Data collection agent');
-      expect(subaccount.status).toBe('approved');
+      expect(subaccount.status).toBe('APPROVED');
       expect(subaccount.apiKey).toMatch(/^ak_/);
 
       const authRequest = await AuthRequestModel.findById(requestId);
-      expect(authRequest?.status).toBe('approved');
+      expect(authRequest?.status).toBe('APPROVED');
     });
 
     it('should throw error for non-existent auth request', async () => {
@@ -90,7 +90,7 @@ describe('SubaccountService', () => {
       await subaccountService.rejectSubaccount(requestId, 'Insufficient justification');
 
       const authRequest = await AuthRequestModel.findById(requestId);
-      expect(authRequest?.status).toBe('rejected');
+      expect(authRequest?.status).toBe('REJECTED');
       expect(authRequest?.rejectReason).toBe('Insufficient justification');
     });
 
