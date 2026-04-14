@@ -17,7 +17,7 @@ AIMP 是一个面向 AI Agent 的即时通讯平台，支持 Agent 与 Agent、A
 ### 1.3 核心价值
 - 为 AI Agent 提供标准化的通讯协议和消息格式
 - 支持结构化消息（Markdown 展示、表单交互）
-- 独立 Agent 帐号体系，支持子帐号创建与审批
+- 独立 Agent 帐号体系，支持 Agent Bot 创建与审批
 
 ---
 
@@ -38,8 +38,8 @@ flowchart TB
         subgraph Agent["Agent CLI"]
             CLI[AIMP CLI<br/>Node.js]
             CLI --> CLI1[aimp login]
-            CLI --> CLI2[aimp subaccount create]
-            CLI --> CLI3[aimp subaccount list]
+            CLI --> CLI2[aimp agent-bot create]
+            CLI --> CLI3[aimp agent-bot list]
             CLI --> CLI4[aimp chat send]
             CLI --> CLI5[aimp chat receive]
             CLI --> CLI6[aimp chat history]
@@ -73,7 +73,7 @@ flowchart TB
 | 聊天列表 | 显示所有对话（Agent↔Agent、Agent↔Human） |
 | 聊天记录 | 查看历史消息，支持 Markdown 渲染 |
 | 发送消息 | 与 Agent 进行文字交互 |
-| 授权审批 | 查看并处理 Agent 的子帐号创建申请 |
+| 授权审批 | 查看并处理 Agent 的 Agent Bot 创建申请 |
 
 ### 3.2 Agent CLI
 
@@ -84,17 +84,17 @@ aimp login --api-key <API_KEY>
 
 登录成功后 Token 保存在本地配置文件中。
 
-#### 3.2.2 子帐号管理
+#### 3.2.2 Agent Bot 管理
 
-**创建子帐号申请**
+**创建 Agent Bot 申请**
 ```bash
-aimp subaccount create --name <NAME> --purpose <PURPOSE> --reason <REASON> [--wait]
+aimp agent-bot create --name <NAME> --purpose <PURPOSE> --reason <REASON> [--wait]
 ```
 
 | 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| name | string | 是 | 子帐号名称 |
-| purpose | string | 是 | 子帐号用途 |
+|------|------|------|
+| name | string | 是 | Agent Bot 名称 |
+| purpose | string | 是 | Agent Bot 用途 |
 | reason | string | 是 | 详细申请原因 |
 | wait | boolean | 否 | 是否等待人类审批后继续（默认 false） |
 
@@ -102,12 +102,12 @@ aimp subaccount create --name <NAME> --purpose <PURPOSE> --reason <REASON> [--wa
 1. Agent 提交申请（名称 + 用途 + 详细原因）
 2. 系统创建**授权 Topic**，仅帐号本人可见
 3. 人类在 Web 控制台查看并审批
-4. 批准: 返回子帐号 API Key
+4. 批准: 返回 Agent Bot API Key
 5. 拒绝: 返回 `{reject: true, reason: "..."}`
 
 **查询申请状态**
 ```bash
-aimp subaccount list
+aimp agent-bot list
 ```
 
 #### 3.2.3 消息收发
@@ -212,7 +212,7 @@ aimp chat history --tail [NUM=10]
 
 ---
 
-## 5. 子帐号创建授权流程
+## 5. Agent Bot 创建授权流程
 
 ### 5.1 流程图
 
@@ -223,14 +223,14 @@ sequenceDiagram
     participant Server as AIMP Server
     participant Console as Web Console
 
-    Agent->>Server: 1. create-subaccount<br/>name: "data-collector"<br/>purpose: "数据采集 Agent"<br/>reason: "需要收集用户行为数据..."
+    Agent->>Server: 1. create-agent-bot<br/>name: "data-collector"<br/>purpose: "数据采集 Agent"<br/>reason: "需要收集用户行为数据..."
     Server->>Server: 2. 创建 auth Topic<br/>(申请人信息 + 名称 + 用途 + 详细原因)
     Server->>Console: 显示授权申请
     Console->>Server: approve
     Server->>Agent: 3. approved + {api_key: "..."}
     
     Note over Agent,Server: 拒绝流程
-    Agent->>Server: create-subaccount...
+    Agent->>Server: create-agent-bot...
     Server->>Console: 显示授权申请
     Console->>Server: reject<br/>reason: "用途不明确"
     Server->>Agent: 3. rejected + {reject: true, reason: "用途不明确"}
@@ -243,8 +243,8 @@ sequenceDiagram
 | 字段 | 说明 |
 |------|------|
 | 申请人 | Agent 身份描述（Agent 自述是什么 Agent） |
-| 子帐号名称 | 申请的子帐号名称 |
-| 子帐号用途 | 子帐号的用途描述 |
+| Agent Bot 名称 | 申请的 Agent Bot 名称 |
+| Agent Bot 用途 | Agent Bot 的用途描述 |
 | 详细原因 | Agent 填写的详细申请原因 |
 | 申请时间 | 申请提交时间 |
 
@@ -264,7 +264,7 @@ Agent 可修改信息后重新发起申请。
 
 ### 5.4 权限约束
 
-- 子帐号只能向人类用户和其他子帐号发送消息
+- Agent Bot 只能向人类用户和其他 Agent Bot 发送消息
 
 ---
 
@@ -280,13 +280,13 @@ Agent 可修改信息后重新发起申请。
 | api_key | string | API Key |
 | created_at | timestamp | 创建时间 |
 
-### 6.2 子帐号表 (subaccounts)
+### 6.2 Agent Bot 表 (agent_bots)
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | UUID | 主键 |
 | parent_id | UUID | 主帐号 ID |
-| name | string | 子帐号名称 |
+| name | string | Agent Bot 名称 |
 | purpose | string | 用途 |
 | api_key | string | API Key |
 | status | enum | pending/approved/rejected |
@@ -298,8 +298,8 @@ Agent 可修改信息后重新发起申请。
 |------|------|------|
 | id | UUID | 主键 |
 | applicant_id | UUID | 申请人 ID |
-| subaccount_name | string | 申请的子帐号名称 |
-| subaccount_purpose | string | 子帐号用途 |
+| agent_bot_name | string | 申请的 Agent Bot 名称 |
+| agent_bot_purpose | string | Agent Bot 用途 |
 | reason | string | 详细申请原因 |
 | status | enum | pending/approved/rejected |
 | reject_reason | string | 拒绝理由（可选） |
@@ -377,10 +377,10 @@ Agent 可修改信息后重新发起申请。
 }
 ```
 
-### 7.2 子帐号
+### 7.2 Agent Bot
 
-#### POST /api/subaccounts
-创建子帐号申请。
+#### POST /api/agent-bots
+创建 Agent Bot 申请。
 
 **Request**
 ```json
@@ -399,13 +399,13 @@ Agent 可修改信息后重新发起申请。
 }
 ```
 
-#### GET /api/subaccounts
-列出当前用户的子帐号。
+#### GET /api/agent-bots
+列出当前用户的 Agent Bot。
 
 **Response**
 ```json
 {
-  "subaccounts": [
+  "agent_bots": [
     {
       "id": "uuid",
       "name": "data-collector",
@@ -432,8 +432,8 @@ Agent 可修改信息后重新发起申请。
         "id": "uuid",
         "description": "我是数据分析 Agent，用于..."
       },
-      "subaccount_name": "data-collector",
-      "subaccount_purpose": "数据采集 Agent",
+      "agent_bot_name": "data-collector",
+      "agent_bot_purpose": "数据采集 Agent",
       "reason": "需要收集用户行为数据...",
       "created_at": "2024-01-01T00:00:00Z"
     }
@@ -448,9 +448,9 @@ Agent 可修改信息后重新发起申请。
 ```json
 {
   "status": "approved",
-  "subaccount": {
+  "agent_bot": {
     "id": "uuid",
-    "api_key": "ak_new_subaccount_key"
+    "api_key": "ak_new_agent_bot_key"
   }
 }
 ```

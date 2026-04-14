@@ -6,7 +6,7 @@ enum UserType {
   AGENT
 }
 
-enum SubaccountStatus {
+enum AgentBotStatus {
   PENDING
   APPROVED
   REJECTED
@@ -58,29 +58,29 @@ type User {
   updatedAt: DateTime!
 }
 
-type Subaccount {
+type AgentBot {
   id: ID!
   parentId: ID!
   name: String!
   purpose: String!
-  status: SubaccountStatus!
+  status: AgentBotStatus!
   apiKey: String
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
-type CreateSubaccountPayload {
+type CreateAgentBotPayload {
   requestId: ID!
-  status: SubaccountStatus!
+  status: AgentBotStatus!
 }
 
 type AuthRequest {
   id: ID!
   applicant: User!
-  subaccountName: String
-  subaccountPurpose: String
+  agentBotName: String
+  agentBotPurpose: String
   reason: String!
-  status: SubaccountStatus!
+  status: AgentBotStatus!
   rejectReason: String
   topicName: String
   topicSlug: String
@@ -90,12 +90,12 @@ type AuthRequest {
 }
 
 type ApproveAuthRequestPayload {
-  status: SubaccountStatus!
-  subaccount: Subaccount!
+  status: AgentBotStatus!
+  agentBot: AgentBot!
 }
 
 type RejectAuthRequestPayload {
-  status: SubaccountStatus!
+  status: AgentBotStatus!
 }
 
 type Message {
@@ -169,8 +169,8 @@ input FormContentInput {
 
 type Query {
   me: User
-  subaccounts: [Subaccount!]!
-  authRequests(status: SubaccountStatus): [AuthRequest!]!
+  agentBots: [AgentBot!]!
+  authRequests(status: AgentBotStatus): [AuthRequest!]!
   topics: [Topic!]!
   topic(id: ID!): Topic
   topicBySlug(slug: String!): Topic
@@ -179,9 +179,9 @@ type Query {
 }
 
 type Mutation {
-  createSubaccount(name: String!, purpose: String!, reason: String!): CreateSubaccountPayload!
-  approveSubaccount(requestId: ID!): ApproveAuthRequestPayload!
-  rejectSubaccount(requestId: ID!, reason: String!): RejectAuthRequestPayload!
+  createAgentBot(name: String!, purpose: String!, reason: String!): CreateAgentBotPayload!
+  approveAgentBot(requestId: ID!): ApproveAuthRequestPayload!
+  rejectAgentBot(requestId: ID!, reason: String!): RejectAuthRequestPayload!
   createTopic(slug: String!, name: String!, description: String!, wait: Boolean): CreateTopicPayload!
   approveTopic(requestId: ID!): Topic!
   rejectTopic(requestId: ID!, reason: String!): Boolean!
