@@ -107,7 +107,7 @@ describe('CLI Integration Tests', () => {
       const result = await runCli([
         'login',
         '--api-key', testUser.apiKey,
-        '--server', apiEndpoint
+        '--server-url', apiEndpoint
       ]);
 
       expect(result.code).toBe(0);
@@ -118,7 +118,7 @@ describe('CLI Integration Tests', () => {
       const result = await runCli([
         'login',
         '--api-key', 'ak_invalid_test_key',
-        '--server', apiEndpoint
+        '--serer-url', apiEndpoint
       ]);
 
       expect(result.code).toBe(1);
@@ -127,7 +127,7 @@ describe('CLI Integration Tests', () => {
     it('should fail login when API key is missing', async () => {
       const result = await runCli([
         'login',
-        '--server', apiEndpoint
+        '--serer-url', apiEndpoint
       ]);
 
       expect(result.code).toBe(1);
@@ -139,7 +139,7 @@ describe('CLI Integration Tests', () => {
       await runCli([
         'login',
         '--api-key', testUser.apiKey,
-        '--server', apiEndpoint
+        '--serer-url', apiEndpoint
       ]);
 
       const result = await runCli(['whoami']);
@@ -162,7 +162,7 @@ describe('CLI Integration Tests', () => {
       await runCli([
         'login',
         '--api-key', testUser.apiKey,
-        '--server', apiEndpoint
+        '--serer-url', apiEndpoint
       ]);
 
       const result = await runCli(['logout']);
@@ -177,7 +177,7 @@ describe('CLI Integration Tests', () => {
       await runCli([
         'login',
         '--api-key', testUser.apiKey,
-        '--server', apiEndpoint
+        '--serer-url', apiEndpoint
       ]);
 
       const loginRes = await request(apiEndpoint)
@@ -198,7 +198,7 @@ describe('CLI Integration Tests', () => {
       await runCli([
         'login',
         '--api-key', testUser.apiKey,
-        '--server', apiEndpoint
+        '--serer-url', apiEndpoint
       ]);
 
       const loginRes = await request(apiEndpoint)
@@ -218,7 +218,7 @@ describe('CLI Integration Tests', () => {
       await runCli([
         'login',
         '--api-key', testUser.apiKey,
-        '--server', apiEndpoint
+        '--serer-url', apiEndpoint
       ]);
 
       const loginRes = await request(apiEndpoint)
@@ -252,7 +252,7 @@ describe('CLI Integration Tests', () => {
       await runCli([
         'login',
         '--api-key', testUser.apiKey,
-        '--server', apiEndpoint
+        '--serer-url', apiEndpoint
       ]);
 
       const loginRes = await request(apiEndpoint)
@@ -274,7 +274,7 @@ describe('CLI Integration Tests', () => {
       await runCli([
         'login',
         '--api-key', testUser.apiKey,
-        '--server', apiEndpoint
+        '--serer-url', apiEndpoint
       ]);
 
       const result = await runCli(['subaccount', 'list']);

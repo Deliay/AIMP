@@ -1,6 +1,6 @@
 import { test as base, Page } from '@playwright/test';
 
-const baseURL = 'http://localhost:39591';
+const baseURL = process.env.FE_URL || 'http://localhost:39591';
 
 async function loginUser(page: Page, email: string, password: string): Promise<void> {
   const response = await fetch(`${baseURL}/api/auth/register`, {

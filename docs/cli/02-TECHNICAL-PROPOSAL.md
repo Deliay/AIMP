@@ -73,7 +73,7 @@ cli/
 
 - 使用 `conf` 库管理配置，支持环境变量覆盖
 - Token 存储在本地，7 天过期后需重新登录
-- `server_url` 默认 `https://api.aimp.dev`，可通过 `--server` 参数覆盖
+- `server_url` 默认 `https://api.aimp.dev`，可通过 `--server-url` 参数覆盖
 
 ## 3. 命令设计
 
@@ -81,7 +81,7 @@ cli/
 
 | 选项 | 说明 |
 |------|------|
-| `--server <URL>` | 指定 API 服务器地址 |
+| `--server-url <URL>` | 指定 API 服务器地址 |
 | `--json` | 输出 JSON 格式 |
 | `--verbose` | 显示详细调试信息 |
 
