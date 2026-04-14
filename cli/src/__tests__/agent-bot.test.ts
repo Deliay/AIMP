@@ -30,12 +30,12 @@ jest.mock('../core/config', () => ({
   }
 }))
 
-import { makeSubaccountCreateCommand, makeSubaccountListCommand } from '../commands/subaccount'
+import { makeAgentBotCreateCommand, makeAgentBotListCommand } from '../commands/agent-bot'
 import { getApiClient } from '../core/api-client'
 
 const mockedGetApiClient = getApiClient as jest.MockedFunction<typeof getApiClient>
 
-describe('subaccount commands', () => {
+describe('agent-bot commands', () => {
   let program: Command
   let consoleLogSpy: jest.SpyInstance
 
@@ -52,14 +52,14 @@ describe('subaccount commands', () => {
   })
 
   describe('create', () => {
-    it('should create subaccount successfully', async () => {
+    it('should create agent-bot successfully', async () => {
       mockPost.mockResolvedValue({
         request_id: 'req-123',
         status: 'pending'
       })
       mockedGetApiClient.mockReturnValue({ post: mockPost, get: mockGet } as unknown as ReturnType<typeof getApiClient>)
 
-      makeSubaccountCreateCommand(program)
+      makeAgentBotCreateCommand(program)
 
       await program.parseAsync([
         'node', 'test', 'create',
@@ -68,7 +68,7 @@ describe('subaccount commands', () => {
         '--reason', 'For testing purposes'
       ])
 
-      expect(mockPost).toHaveBeenCalledWith('/api/subaccounts', {
+      expect(mockPost).toHaveBeenCalledWith('/api/agent-bots', {
         name: 'test-agent',
         purpose: 'Testing',
         reason: 'For testing purposes'
@@ -78,7 +78,7 @@ describe('subaccount commands', () => {
   })
 
   describe('list', () => {
-    it('should list subaccounts successfully', async () => {
+    it('should list agent-bots successfully', async () => {
       mockGet.mockResolvedValue([
         {
           id: 'sub-1',
@@ -97,23 +97,23 @@ describe('subaccount commands', () => {
       ])
       mockedGetApiClient.mockReturnValue({ post: mockPost, get: mockGet } as unknown as ReturnType<typeof getApiClient>)
 
-      makeSubaccountListCommand(program)
+      makeAgentBotListCommand(program)
 
       await program.parseAsync(['node', 'test', 'list'])
 
-      expect(mockGet).toHaveBeenCalledWith('/api/subaccounts')
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('子帐号列表'))
+      expect(mockGet).toHaveBeenCalledWith('/api/agent-bots')
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Agent Bot 列表'))
     })
 
-    it('should show message when no subaccounts', async () => {
+    it('should show message when no agent-bots', async () => {
       mockGet.mockResolvedValue([])
       mockedGetApiClient.mockReturnValue({ post: mockPost, get: mockGet } as unknown as ReturnType<typeof getApiClient>)
 
-      makeSubaccountListCommand(program)
+      makeAgentBotListCommand(program)
 
       await program.parseAsync(['node', 'test', 'list'])
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('暂无子帐号'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('暂无 Agent Bot'))
     })
   })
 })

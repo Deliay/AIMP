@@ -25,7 +25,7 @@ cli/
 │   ├── commands/          # Commander.js 命令定义
 │   │   ├── login.ts
 │   │   ├── logout.ts
-│   │   ├── subaccount/
+│   │   ├── agent-bot/
 │   │   │   ├── create.ts
 │   │   │   └── list.ts
 │   │   └── chat/

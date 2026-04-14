@@ -4,8 +4,8 @@ import type {
   FormField,
   Message,
   LoginResponse,
-  Subaccount,
-  CreateSubaccountResponse,
+  AgentBot,
+  CreateAgentBotResponse,
   SendMessageResponse,
   FormSubmitResponse,
   ChatMessage,
@@ -86,9 +86,9 @@ describe('types', () => {
     })
   })
 
-  describe('Subaccount', () => {
+  describe('AgentBot', () => {
     it('should support all status types', () => {
-      const pending: Subaccount = {
+      const pending: AgentBot = {
         id: '1',
         name: 'test',
         purpose: 'testing',
@@ -97,17 +97,17 @@ describe('types', () => {
       }
       expect(pending.status).toBe('pending')
 
-      const approved: Subaccount = { ...pending, status: 'approved' }
+      const approved: AgentBot = { ...pending, status: 'approved' }
       expect(approved.status).toBe('approved')
 
-      const rejected: Subaccount = { ...pending, status: 'rejected' }
+      const rejected: AgentBot = { ...pending, status: 'rejected' }
       expect(rejected.status).toBe('rejected')
     })
   })
 
-  describe('CreateSubaccountResponse', () => {
+  describe('CreateAgentBotResponse', () => {
     it('should have correct structure', () => {
-      const response: CreateSubaccountResponse = {
+      const response: CreateAgentBotResponse = {
         requestId: 'req-123',
         status: 'pending'
       }
@@ -165,7 +165,7 @@ describe('types', () => {
         userId: 'user',
         apiKey: 'ak_xxx',
         serverUrl: 'https://api.aimp.dev',
-        activeSubaccountId: 'sub-1'
+        activeAgentBotId: 'sub-1'
       }
       expect(cfg.serverUrl).toBe('https://api.aimp.dev')
     })

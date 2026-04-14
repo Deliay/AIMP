@@ -4,29 +4,29 @@ import ora from 'ora'
 import { getApiClient, handleApiError } from '../../core/api-client'
 import { resolve } from '../../core/config'
 
-interface CreateSubaccountResponse {
-  createSubaccount: {
+interface CreateAgentBotResponse {
+  createAgentBot: {
     requestId: string
     status: string
   }
 }
 
-interface SubaccountStatusResponse {
+interface AgentBotStatusResponse {
   authRequests: Array<{
     id: string
     status: string
-    subaccount?: {
+    agentBot?: {
       apiKey?: string
     }
   }>
 }
 
-export const makeSubaccountCreateCommand = (program: Command) => {
+export const makeAgentBotCreateCommand = (program: Command) => {
   program
     .command('create')
-    .description('创建子帐号申请')
-    .requiredOption('--name <NAME>', '子帐号名称')
-    .requiredOption('--purpose <PURPOSE>', '子帐号用途')
+    .description('创建 Agent Bot 申请')
+    .requiredOption('--name <NAME>', 'Agent Bot 名称')
+    .requiredOption('--purpose <PURPOSE>', 'Agent Bot 用途')
     .requiredOption('--reason <REASON>', '详细申请原因')
     .option('--wait', '等待人类审批后继续')
     .action(async (options, cmd) => {
@@ -36,9 +36,9 @@ export const makeSubaccountCreateCommand = (program: Command) => {
         const serverUrl = cmd.parent?.opts()?.serverUrl;
         const client = getApiClient(resolve.serverUrl(serverUrl));
 
-        const response = await client.graphql<CreateSubaccountResponse>(`
-          mutation CreateSubaccount($name: String!, $purpose: String!, $reason: String!) {
-            createSubaccount(name: $name, purpose: $purpose, reason: $reason) {
+        const response = await client.graphql<CreateAgentBotResponse>(`
+          mutation CreateAgentBot($name: String!, $purpose: String!, $reason: String!) {
+            createAgentBot(name: $name, purpose: $purpose, reason: $reason) {
               requestId
               status
             }
@@ -51,12 +51,12 @@ export const makeSubaccountCreateCommand = (program: Command) => {
 
         if (options.wait) {
           spinner.text = '申请已提交，等待审批...'
-          await pollForApproval(client, response.createSubaccount.requestId)
+          await pollForApproval(client, response.createAgentBot.requestId)
           spinner.succeed(chalk.green('✓ 审批通过'))
-          console.log(chalk.blue('申请ID:'), response.createSubaccount.requestId)
+          console.log(chalk.blue('申请ID:'), response.createAgentBot.requestId)
         } else {
           spinner.succeed(chalk.green('✓ 申请已提交'))
-          console.log(chalk.blue('申请ID:'), response.createSubaccount.requestId)
+          console.log(chalk.blue('申请ID:'), response.createAgentBot.requestId)
           console.log(chalk.yellow('请在 Web Console 查看审批状态'))
         }
       } catch (error) {
@@ -74,7 +74,7 @@ async function pollForApproval(
   intervalMs = 5000
 ): Promise<void> {
   for (let i = 0; i < maxAttempts; i++) {
-    const response = await client.graphql<SubaccountStatusResponse>(`
+    const response = await client.graphql<AgentBotStatusResponse>(`
       query GetAuthRequests {
         authRequests {
           id

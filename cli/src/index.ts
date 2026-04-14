@@ -4,7 +4,7 @@ import { Command } from 'commander'
 import { makeLoginCommand } from './commands/login'
 import { makeLogoutCommand } from './commands/logout'
 import { makeWhoamiCommand } from './commands/whoami'
-import { makeSubaccountCommands } from './commands/subaccount'
+import { makeAgentBotCommands } from './commands/agent-bot'
 import { makeChatCommands } from './commands/chat'
 import { makeTopicCommands } from './commands/topic'
 
@@ -23,7 +23,7 @@ program
 makeLoginCommand(program)
 makeLogoutCommand(program)
 makeWhoamiCommand(program)
-makeSubaccountCommands(program)
+makeAgentBotCommands(program)
 makeChatCommands(program)
 makeTopicCommands(program)
 

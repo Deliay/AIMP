@@ -24,7 +24,7 @@ export interface LoginResponse {
   userId: string
 }
 
-export interface Subaccount {
+export interface AgentBot {
   id: string
   name: string
   purpose: string
@@ -32,7 +32,7 @@ export interface Subaccount {
   createdAt: string
 }
 
-export interface CreateSubaccountResponse {
+export interface CreateAgentBotResponse {
   requestId: string
   status: 'pending'
 }
@@ -60,7 +60,7 @@ export interface Config {
   userId?: string
   apiKey?: string
   serverUrl: string
-  activeSubaccountId?: string
+  activeAgentBotId?: string
 }
 
 export interface GlobalOptions {
