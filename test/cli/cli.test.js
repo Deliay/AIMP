@@ -194,7 +194,7 @@ describe('CLI Integration Tests', () => {
       expect(meRes.body.data.me.id).toBe(testUser.userId);
     });
 
-    it('should query subaccounts via GraphQL', async () => {
+    it('should query agentBots via GraphQL', async () => {
       await runCli([
         'login',
         '--api-key', testUser.apiKey,
@@ -205,16 +205,16 @@ describe('CLI Integration Tests', () => {
         .post('/api/auth/cli-login')
         .send({ apiKey: testUser.apiKey });
 
-      const subaccountsRes = await request(apiEndpoint)
+      const agentBotsRes = await request(apiEndpoint)
         .post('/graphql')
         .set('Authorization', `Bearer ${loginRes.body.token}`)
-        .send({ query: '{ subaccounts { id name status } }' });
+        .send({ query: '{ agentBots { id name status } }' });
 
-      expect(subaccountsRes.status).toBe(200);
-      expect(subaccountsRes.body.data.subaccounts).toBeInstanceOf(Array);
+      expect(agentBotsRes.status).toBe(200);
+      expect(agentBotsRes.body.data.agentBots).toBeInstanceOf(Array);
     });
 
-    it('should create subaccount via GraphQL mutation', async () => {
+    it('should create agentBot via GraphQL mutation', async () => {
       await runCli([
         'login',
         '--api-key', testUser.apiKey,
@@ -230,7 +230,7 @@ describe('CLI Integration Tests', () => {
         .set('Authorization', `Bearer ${loginRes.body.token}`)
         .send({
           query: `mutation($name: String!, $purpose: String!, $reason: String!) {
-            createSubaccount(name: $name, purpose: $purpose, reason: $reason) {
+            createAgentBot(name: $name, purpose: $purpose, reason: $reason) {
               requestId
               status
             }
@@ -243,9 +243,9 @@ describe('CLI Integration Tests', () => {
         });
 
       expect(createRes.status).toBe(200);
-      expect(createRes.body.data.createSubaccount).toBeTruthy();
-      expect(createRes.body.data.createSubaccount.requestId).toBeTruthy();
-      expect(createRes.body.data.createSubaccount.status).toBe('PENDING');
+      expect(createRes.body.data.createAgentBot).toBeTruthy();
+      expect(createRes.body.data.createAgentBot.requestId).toBeTruthy();
+      expect(createRes.body.data.createAgentBot.status).toBe('PENDING');
     });
 
     it('should query topics via GraphQL', async () => {
@@ -269,15 +269,15 @@ describe('CLI Integration Tests', () => {
     });
   });
 
-  describe('CLI Subaccount Command', () => {
-    it('should run subaccount list command', async () => {
+  describe('CLI AgentBot Command', () => {
+    it('should run agent-bot list command', async () => {
       await runCli([
         'login',
         '--api-key', testUser.apiKey,
         '--serer-url', apiEndpoint
       ]);
 
-      const result = await runCli(['subaccount', 'list']);
+      const result = await runCli(['agent-bot', 'list']);
 
       expect(result.code).toBe(0);
     });
@@ -310,25 +310,25 @@ describe('CLI Contract Compliance', () => {
     it('should use GraphQL for non-auth operations', () => {
       const graphqlOperations = [
         'Query.me',
-        'Query.subaccounts',
+        'Query.agentBots',
         'Query.topics',
         'Query.messages',
-        'Mutation.createSubaccount',
+        'Mutation.createAgentBot',
         'Mutation.sendMessage',
         'Mutation.markAsRead',
         'Mutation.regenerateApiKey'
       ];
 
       expect(graphqlOperations).toContain('Query.me');
-      expect(graphqlOperations).toContain('Mutation.createSubaccount');
+      expect(graphqlOperations).toContain('Mutation.createAgentBot');
       expect(graphqlOperations).toContain('Mutation.sendMessage');
     });
 
     it('should document CLI commands use GraphQL for data operations', () => {
       const cliCommands = [
         'aimp login - uses /api/auth/cli-login',
-        'aimp subaccount create - uses createSubaccount mutation',
-        'aimp subaccount list - uses subaccounts query',
+        'aimp agent-bot create - uses createAgentBot mutation',
+        'aimp agent-bot list - uses agentBots query',
         'aimp chat send - uses sendMessage mutation',
         'aimp chat history - uses messages query',
         'aimp whoami - uses me query'
