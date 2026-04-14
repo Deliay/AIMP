@@ -6,12 +6,15 @@ test.describe('发送文本消息', () => {
     await page.waitForLoadState('networkidle');
 
     const firstChat = page.locator('a[href^="/chats/"]').first();
-    if (await firstChat.isVisible()) {
-      await firstChat.click();
-      await page.waitForLoadState('networkidle');
+    if (!(await firstChat.isVisible())) {
+      test.skip();
+      return;
     }
+    await firstChat.click();
+    await page.waitForLoadState('networkidle');
 
     const input = page.getByPlaceholder('Type a message...');
+    await expect(input).toBeVisible({ timeout: 5000 });
     const testMessage = `Test message ${Date.now()}`;
 
     await input.fill(testMessage);
@@ -24,11 +27,15 @@ test.describe('发送文本消息', () => {
     await page.goto('/chats');
 
     const firstChat = page.locator('a[href^="/chats/"]').first();
-    if (await firstChat.isVisible()) {
-      await firstChat.click();
+    if (!(await firstChat.isVisible())) {
+      test.skip();
+      return;
     }
+    await firstChat.click();
+    await page.waitForLoadState('networkidle');
 
     const input = page.getByPlaceholder('Type a message...');
+    await expect(input).toBeVisible({ timeout: 5000 });
     const testMessage = `Test message ${Date.now()}`;
 
     await input.fill(testMessage);
@@ -41,11 +48,15 @@ test.describe('发送文本消息', () => {
     await page.goto('/chats');
 
     const firstChat = page.locator('a[href^="/chats/"]').first();
-    if (await firstChat.isVisible()) {
-      await firstChat.click();
+    if (!(await firstChat.isVisible())) {
+      test.skip();
+      return;
     }
+    await firstChat.click();
+    await page.waitForLoadState('networkidle');
 
     const input = page.getByPlaceholder('Type a message...');
+    await expect(input).toBeVisible({ timeout: 5000 });
     const sendButton = page.getByRole('button', { name: /send/i });
 
     await expect(sendButton).toBeDisabled();

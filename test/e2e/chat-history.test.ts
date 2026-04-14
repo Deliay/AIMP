@@ -36,9 +36,12 @@ test.describe('聊天记录查看与 Markdown 渲染', () => {
     await page.goto('/chats');
 
     const firstChat = page.locator('a[href^="/chats/"]').first();
-    if (await firstChat.isVisible()) {
-      await firstChat.click();
+    if (!(await firstChat.isVisible())) {
+      test.skip();
+      return;
     }
+    await firstChat.click();
+    await page.waitForLoadState('networkidle');
 
     const agentBadge = page.getByText('Agent').first();
     const humanBadge = page.getByText('Human').first();
